@@ -2,6 +2,7 @@ const express = require("express");
 const {check, validationResult} = require("express-validator");
 const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
+const checkUserRole = require("../middlewares/checkRole");
 const router = express.Router();
 
 /*----------------------------------------*/
@@ -64,7 +65,7 @@ router.get("/details/:productId", async (req, res) => {
 /*----------------*/
 // Crear productos
 /*----------------*/
-router.post("/", [
+router.post("/", checkUserRole, [
   check("name", "Product name is required").not().isEmpty(),
   check("name", "Product name must be between 4 and 50 caracters").isLength({min: 4, max: 50}),
   check("category", "Product category not found").isMongoId(),
@@ -115,7 +116,7 @@ router.post("/", [
 /*------------------*/
 // Eliminar productos
 /*------------------*/
-router.delete("/:productId", async (req, res) => {
+router.delete("/:productId", checkUserRole, async (req, res) => {
   try {
     const {productId} = req.params;
     const product = await Category.findByIdAndDelete(productId);
@@ -144,7 +145,7 @@ router.delete("/:productId", async (req, res) => {
 /*-------------------------------*/
 // Editar (actualizar) productos
 /*-------------------------------*/
-router.patch("/:productId", async (req, res) => {
+router.patch("/:productId", checkUserRole, async (req, res) => {
   try {
     const {category} = req.body;
     const checkCategory = await Category.findById(category);

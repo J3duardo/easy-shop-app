@@ -4,8 +4,11 @@ const cors = require("cors");
 const morgan = require("morgan");
 require("dotenv").config();
 
+const jwtValidator = require("./middlewares/jwtValidator");
+const errorsHandler = require("./middlewares/errorsHandler");
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 7500;
@@ -14,10 +17,13 @@ const PORT = process.env.PORT || 7500;
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(jwtValidator());
+app.use(errorsHandler);
 
 // Rutas
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/user", userRoutes);
 
 mongoose.connect(process.env.MONGODB_URL, {
   useNewUrlParser: true,

@@ -1,6 +1,7 @@
 const express = require("express");
 const {check, validationResult} = require("express-validator");
 const Category = require("../models/categoryModel");
+const checkUserRole = require("../middlewares/checkRole");
 const router = express.Router();
 
 /*------------------------------------------*/
@@ -55,7 +56,7 @@ router.get("/:categoryId", async (req, res) => {
 /*-----------------*/
 // Crear categorias
 /*-----------------*/
-router.post("/", [
+router.post("/", checkUserRole, [
   check("name", "The nameof the category is required").not().isEmpty(),
   check("name", "The name of the category must be between 4 and 50 characters").isLength({min: 4, max: 50})
 ], async (req, res) => {
@@ -91,7 +92,7 @@ router.post("/", [
 /*-------------------*/
 // Eliminar categorías
 /*-------------------*/
-router.delete("/:categoryId", async (req, res) => {
+router.delete("/:categoryId", checkUserRole, async (req, res) => {
   try {
     const {categoryId} = req.params;
     const category = await Category.findByIdAndDelete(categoryId);
@@ -120,7 +121,7 @@ router.delete("/:categoryId", async (req, res) => {
 /*-------------------------------*/
 // Editar (actualizar) categorías
 /*-------------------------------*/
-router.patch("/:categoryId", async (req, res) => {
+router.patch("/:categoryId", checkUserRole, async (req, res) => {
   try {
     const {categoryId} = req.params;
     const category = await Category.findById(categoryId);

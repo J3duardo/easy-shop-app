@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const {check, validationResult} = require("express-validator");
 const Order = require("../models/orderModel");
 const OrderItem = require("../models/orderItemModel");
@@ -160,6 +161,42 @@ router.patch("/:orderId", checkRole, async (req, res) => {
       status: "success",
       msg: "Order status modified successfully",
       data: order
+    })
+    
+  } catch (error) {
+    res.status(500).json({
+      status: "failed",
+      msg: `Error: ${error.message}`
+    })
+  }
+});
+
+
+/*-------------------*/
+// Eliminar una orden
+/*-------------------*/
+router.delete("/:orderId", async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+
+    if(!order) {
+      return res.status(404).json({status: "failed", msg: "Order not found or already deleted from database"})
+    }
+
+    // Extraer las ids de los order items asociados a la orden eliminada para eliminarlos también
+    const orderItemsObjectIds = order.orderItems.map(id => {
+      return new mongoose.Types.ObjectId(id)
+    });
+    
+    // Borrar la orden de la base de datos
+    await order.delete();
+    // Borrar los order items asociados a la orden borrada
+    const orderItems = await OrderItem.find({_id: {$in: orderItemsObjectIds}});
+    await Promise.all(orderItems.map(item => item.delete()))
+
+    res.json({
+      status: "success",
+      msg: "The order and its associated items were successfully removed from the database"
     })
     
   } catch (error) {

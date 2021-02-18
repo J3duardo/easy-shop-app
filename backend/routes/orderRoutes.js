@@ -205,6 +205,38 @@ router.delete("/:orderId", async (req, res) => {
       msg: `Error: ${error.message}`
     })
   }
-})
+});
+
+
+/*----------------------------*/
+// Calcular las ventas totales
+/*----------------------------*/
+router.get("/get/total-sales", checkRole, async (req, res) => {
+  try {
+    const totalSales = await Order.aggregate([
+      {$group: {_id: mongoose.Types.ObjectId(), totalSales: {$sum: "$totalPrice"}}}
+    ]);
+
+    const ordersCount = await Order.countDocuments((count) => count);
+
+    if(!totalSales || !ordersCount) {
+      return res.status(400).json({status: "failed", msg: "The total sales couldn't be calculated"})
+    };
+
+    res.json({
+      status: "success",
+      data: {
+        totalSales: totalSales[0].totalSales,
+        totalOrders: ordersCount
+      }
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      status: "failed",
+      msg: `Error: ${error.message}`
+    })
+  }
+});
 
 module.exports = router;

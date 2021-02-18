@@ -9,6 +9,7 @@ const errorsHandler = require("./middlewares/errorsHandler");
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const userRoutes = require("./routes/userRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 7500;
@@ -24,6 +25,7 @@ app.use(errorsHandler);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/orders", orderRoutes);
 
 mongoose.connect(process.env.MONGODB_URL, {
   useNewUrlParser: true,

@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require("path");
 const cors = require("cors");
 const morgan = require("morgan");
 require("dotenv").config();
@@ -15,9 +16,11 @@ const app = express();
 const PORT = process.env.PORT || 7500;
 
 // Middlewares
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 app.use(morgan("dev"));
-app.use(express.json());
 app.use(jwtValidator());
 app.use(errorsHandler);
 

@@ -1,9 +1,38 @@
 const express = require("express");
 const {check, validationResult} = require("express-validator");
+const multer = require("multer");
 const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
 const checkUserRole = require("../middlewares/checkRole");
 const router = express.Router();
+
+/*------------------------*/
+// Configuración de multer
+/*------------------------*/
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    let error = null;
+    const fileTypeCheck = file.mimetype.includes("jpg") || file.mimetype.includes("jpeg") || file.mimetype.includes("png");
+
+    if(!fileTypeCheck) {
+      error = "Invalid file type. File must be an image either .jpg or .jpeg or .png"
+    }
+
+    cb(error, "public/uploads");
+  },
+  filename: (req, file, cb) => {
+    // Eliminar la extensión del nombre original
+    const filenameArr = file.originalname.split(".");
+    filenameArr.splice(filenameArr.length - 1, 1);
+    // Reemplazar los espacios del nombre del archivo por guiones
+    const filename = filenameArr[0].split(" ").join("-").toLowerCase();
+    // Extraer la extensión del archivo
+    const extension = file.mimetype.split("/")[1];
+    cb(null, `${filename}-${Date.now()}.${extension}`)
+  }
+});
+
+const upload = multer({storage});
 
 /*----------------------------------------*/
 // Consultar todos los productos existentes
@@ -65,7 +94,7 @@ router.get("/details/:productId", async (req, res) => {
 /*----------------*/
 // Crear productos
 /*----------------*/
-router.post("/", checkUserRole, [
+router.post("/", checkUserRole, upload.single("image"), [
   check("name", "Product name is required").not().isEmpty(),
   check("name", "Product name must be between 4 and 50 caracters").isLength({min: 4, max: 50}),
   check("category", "Product category not found").isMongoId(),
@@ -82,7 +111,17 @@ router.post("/", checkUserRole, [
   }
 
   try {
-    const {name, description, richDescription, image, images, brand, price, category, countInStock, rating, numReviews, isFeatured} = req.body;
+    if(!req.file) {
+      return res.status(400).json({
+        status: "failed",
+        msg: "The product image is required"
+      })
+    }
+
+    const filename = req.file.filename;
+    const basePath = `${req.protocol}://${req.get("host")}/public/upload`
+
+    const {name, description, richDescription, images, brand, price, category, countInStock, rating, numReviews, isFeatured} = req.body;
 
     const checkCategory = await Category.findById(category);
 
@@ -94,7 +133,7 @@ router.post("/", checkUserRole, [
     }
 
     const product = new Product({
-      name, description, richDescription, image, images, brand, price, category, countInStock, rating, numReviews, isFeatured
+      name, description, richDescription, image: `${basePath}/${filename}`, images, brand, price, category, countInStock, rating, numReviews, isFeatured
     });
 
     await product.save();
@@ -187,6 +226,42 @@ router.patch("/:productId", checkUserRole, async (req, res) => {
     })
   }
 });
+
+
+/*------------------------------------------*/
+// Subir la galería de imágenes del producto
+/*------------------------------------------*/
+router.patch("/product-gallery/:productId", checkUserRole, upload.array("images", 10), async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId);
+
+    if(!product) {
+      return res.status(404).json({status: "failed", msg: "Product not found or deleted"})
+    }
+
+    const imagePaths = [];
+    const basePath = `${req.protocol}://${req.get("host")}/public/uploads`;
+
+    req.files.forEach(file => {
+      imagePaths.push(`${basePath}/${file.filename}`)
+    });
+
+    product.images = imagePaths;
+    await product.save();
+
+    res.json({
+      status: "success",
+      msg: `Product "${product.name}" images uploaded successfully`,
+      data: product
+    })
+    
+  } catch (error) {
+    res.status(500).json({
+      status: "failed",
+      msg: `Error: ${error.message}`
+    })
+  }
+})
 
 
 /*-----------------------------*/

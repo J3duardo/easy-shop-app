@@ -1,6 +1,7 @@
 node_modules
 npm-debug.*
 web-build/
+public
 .env
 *.jks
 *.p8

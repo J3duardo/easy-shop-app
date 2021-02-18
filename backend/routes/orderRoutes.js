@@ -123,7 +123,7 @@ router.post("/", checkRole, [
       orderItemsIds.push(newOrderItem._id);
     }
 
-    // Generar la ordeny almacenarla en la base de datos
+    // Generar la orden y almacenarla en la base de datos
     const order = new Order({...req.body, orderItems: orderItemsIds, totalPrice});
     await order.save();
 

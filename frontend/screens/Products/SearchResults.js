@@ -9,7 +9,11 @@ const SearchResults = (props) => {
       {items ?
         items.map(item => {
           return (
-            <ListItem key={item._id.$oid} avatar>
+            <ListItem
+              avatar
+              key={item._id.$oid}
+              onPress={() => props.navigation.navigate("Product Details", {item})}
+            >
               <Left>
                 <Thumbnail
                   source={{uri: item.image ? item.image : "https://cdn.pixabay.com/photo/2012/04/01/17/29/box-23649_960_720.png"}}

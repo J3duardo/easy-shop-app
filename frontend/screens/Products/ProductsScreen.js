@@ -8,25 +8,23 @@ import productsData from "./testProducts.json";
 import categoriesData from "./categories.json";
 import CategoryFilter from "./CategoryFilter";
 
-const ProductsScreen = () => {
-  const [products, setProducts] = useState(null);
-  const [categories, setCategories] = useState(null);
+const ProductsScreen = (props) => {
+  const [categories, setCategories] = useState([]);
   const [productsByCategory, setProductsByCategory] = useState([]);
   const [active, setActive] = useState(null);
   const [term, setTerm] = useState(null);
   const [filteredProducts, setFilteredProducts] = useState(null);
 
   useEffect(() => {
-    setProducts(productsData);
     setProductsByCategory(productsData);
     setFilteredProducts(productsData);
     setCategories(categoriesData);
     setActive("All");
 
     return () => {
-      setProducts([]);
+      // setProducts([]);
       setFilteredProducts(null);
-      setCategories(null);
+      setCategories([]);
       setProductsByCategory([])
     };
   }, []);
@@ -59,7 +57,7 @@ const ProductsScreen = () => {
 
   return (
     <Container>
-      <Header searchBar rounded androidStatusBarColor="green">
+      <Header searchBar rounded androidStatusBarColor="#03bafc">
         <Item>
           <Icon name="md-search-sharp" />
           <Input
@@ -69,7 +67,7 @@ const ProductsScreen = () => {
         </Item>
       </Header>
       {term ?
-        <SearchResults items={filteredProducts} />
+        <SearchResults items={filteredProducts} navigation={props.navigation} />
         :
         <ScrollView
           style={{width: Dimensions.get("window").width, flex: 1}}
@@ -95,7 +93,7 @@ const ProductsScreen = () => {
             />
           </View>
           {productsByCategory.length > 0 ?
-            <View>
+            <View style={{marginBottom: 10}}>
               <FlatList
                 numColumns={2}
                 columnWrapperStyle={{justifyContent: "space-between"}}
@@ -103,7 +101,7 @@ const ProductsScreen = () => {
                 keyExtractor={(el) => el._id.$oid}
                 renderItem={({item}) => {
                   return (
-                    <ProductListItem item={item}/>
+                    <ProductListItem item={item} navigation={props.navigation} />
                   )
                 }}
               />

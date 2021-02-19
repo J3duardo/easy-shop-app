@@ -18,7 +18,7 @@ const ProductCard = (props) => {
       <Text style={styles.price}>${price}</Text>
       {countInStock > 0 ?
         <View style={{width: "75%", marginTop: 10}}>
-          <Button title="Add" color="green"  />
+          <Button title="Add" color="#03bafc"  />
         </View>
         :
         <Text style={{marginTop: 20}}>Currently unavailable</Text>

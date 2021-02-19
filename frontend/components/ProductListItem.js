@@ -6,7 +6,12 @@ const ProductListItem = (props) => {
   const {item} = props;
 
   return (
-    <TouchableOpacity style={styles.touchable}>
+    <TouchableOpacity
+      style={styles.touchable}
+      onPress={() => {
+        props.navigation.navigate("Product Details", {item})
+      }}
+    >
       <View style={styles.wrapper}>
         <ProductCard item={item}/>
       </View>

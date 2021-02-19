@@ -10,3 +10,4 @@ public
 *.key
 *.mobileprovision
 *.orig.*
+debug.log

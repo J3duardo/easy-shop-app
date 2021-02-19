@@ -3,6 +3,7 @@ npm-debug.*
 web-build/
 public
 .env
+.expo*
 *.jks
 *.p8
 *.p12

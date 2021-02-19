@@ -33,7 +33,8 @@ const styles = StyleSheet.create({
     height: Dimensions.get("window").width / 1.7,
     marginTop: 30,
     alignItems: "center",
-    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#ddd",
     borderRadius: 10,
   },
   image: {

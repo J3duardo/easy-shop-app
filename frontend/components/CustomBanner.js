@@ -22,19 +22,23 @@ const CustomBanner = () => {
       <View style={styles.container}>
         <View style={styles.swiper}>
           <Swiper
-            style={{height: width/2}}
-            showsButtons={false}
+            style={{height: 130}}
+            containerStyle={{flexDirection: "row", alignItems: "center", marginTop: 10, padding: 0}}
+            showsPagination={false}
+            showsButtons={true}
             autoplay
             autoplayTimeout={4}
           >
             {bannerData.map((item, i) => {
               return (
-                <Image
-                  key={i}
-                  style={styles.imageBanner}
-                  resizeMode="contain"
-                  source={{uri: item}}
-                />
+                <View key={i} style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
+                  <Image
+                    key={i}
+                    style={styles.imageBanner}
+                    resizeMode="contain"
+                    source={{uri: item}}
+                  />
+                </View>
               )
             })}
           </Swiper>

@@ -12,7 +12,7 @@ const TabsNavigator = () => {
       initialRouteName="Home"
       tabBarOptions={{
         keyboardHidesTabBar: true,
-        showLabel: false,
+        showLabel: true,
         // activeTintColor: "#e91e63"
         activeTintColor: "#03bafc"
       }}

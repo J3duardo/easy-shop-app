@@ -1,11 +1,19 @@
 import React from "react";
 import {View, Text, Image, Button, StyleSheet, Dimensions} from "react-native";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {addToCart} from "../redux/actions/cartActions";
 
 const ProductCard = (props) => {
   const {name, price, image, countInStock} = props.item;
   const dispatch = useDispatch();
+  const items = useSelector((state) => state.cart.items);
+
+  /*--------------------------------------------*/
+  // Chequear si el item ya fue agregado al cart
+  /*--------------------------------------------*/
+  const isAddedToCart = () => {
+    return items.findIndex(item => item._id.$oid === props.item._id.$oid) > -1
+  }
 
   return (
     <View style={styles.container}>
@@ -22,8 +30,9 @@ const ProductCard = (props) => {
       {countInStock > 0 ?
         <View style={{width: "75%", marginTop: 10}}>
           <Button
-            title="Add"
+            title={`${isAddedToCart() ? "Added": "Add"}`}
             color="#03bafc"
+            disabled={isAddedToCart()}
             onPress={() => dispatch(addToCart(props.item))}
           />
         </View>

@@ -1,8 +1,11 @@
 import React from "react";
 import {View, Text, Image, Button, StyleSheet, Dimensions} from "react-native";
+import {useDispatch} from "react-redux";
+import {addToCart} from "../redux/actions/cartActions";
 
 const ProductCard = (props) => {
   const {name, price, image, countInStock} = props.item;
+  const dispatch = useDispatch();
 
   return (
     <View style={styles.container}>
@@ -18,7 +21,11 @@ const ProductCard = (props) => {
       <Text style={styles.price}>${price}</Text>
       {countInStock > 0 ?
         <View style={{width: "75%", marginTop: 10}}>
-          <Button title="Add" color="#03bafc"  />
+          <Button
+            title="Add"
+            color="#03bafc"
+            onPress={() => dispatch(addToCart(props.item))}
+          />
         </View>
         :
         <Text style={{marginTop: 20}}>Currently unavailable</Text>

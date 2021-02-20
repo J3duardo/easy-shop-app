@@ -9,7 +9,7 @@ const cartReducer = (state = initialState, action) => {
     case CART_ITEM_TYPES.ADD_TO_CART:
       return {...state, items: [...state.items, action.payload]}
     case CART_ITEM_TYPES.REMOVE_FROM_CART:
-      const filteredItems = state.items.filter(item => item._id.$oid !== action.payload._id.$oid);
+      const filteredItems = state.items.filter(item => item._id.$oid !== action.payload);
       return {...state, items: filteredItems}
     case CART_ITEM_TYPES.CLEAR_CART:
       return {...state, items: []}

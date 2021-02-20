@@ -1,10 +1,12 @@
 import React from "react";
-import {View, Dimensions, StyleSheet} from "react-native";
+import {View, Dimensions, StyleSheet, TouchableOpacity} from "react-native";
 import {useNavigation} from "@react-navigation/native";
 import {Container, Text, Button, Left, Right, H1, ListItem, Thumbnail, Body} from "native-base";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import {useSelector, useDispatch} from "react-redux";
+import {SwipeListView} from "react-native-swipe-list-view";
 import {addToCart, removeFromCart, clearCart} from "../../redux/actions/cartActions";
+import CartItem from "../../components/CartItem";
 
 const Cart = () => {
   const navigation = useNavigation();
@@ -16,34 +18,37 @@ const Cart = () => {
     if(cartItems.length > 0) {
       // Calcular el precio total a pagar
       let totalPrice = null;
-      cartItems.forEach(item => totalPrice = totalPrice + item.price);
+      cartItems.forEach(item => totalPrice = +(totalPrice + item.price).toFixed(2));
 
       return (
         <Container>
           <H1 style={{alignSelf: "center"}}>Cart</H1>
-          {cartItems.map(item => {
-						return (
-							<ListItem
-                style={styles.listItem}
-                key={item._id.$oid}
-                avatar
-							>
-                <Left>
-                  <Thumbnail
-                    source={{uri: item.image ? item.image : "https://cdn.pixabay.com/photo/2012/04/01/17/29/box-23649_960_720.png"}}
-                  />
-                </Left>
-                <Body style={styles.itemBody}>
-                  <Left>
-                    <Text>{item.name}</Text>
-                  </Left>
-                  <Right>
-                    <Text>${item.price}</Text>
-                  </Right>
-                </Body>
-							</ListItem>
-						)
-					})}
+          <SwipeListView
+            keyExtractor={(item) => item._id.$oid}
+            data={cartItems}
+            renderItem={(item) => {
+              return <CartItem item={item} />
+            }}
+            renderHiddenItem={(item) => {
+              return (
+                <View style={styles.hiddenSwipeContainer}>
+                  <TouchableOpacity
+                    style={styles.hiddenSwipeBtn}
+                    onPress={() => dispatch(removeFromCart(item.item._id.$oid))}
+                  >
+                    <Icon name="trash" color="white" size={24} />
+                  </TouchableOpacity>
+                </View>
+              )
+            }}
+            disableRightSwipe={true}
+            previewOpenDelay={3000}
+            friction={1000}
+            tension={40}
+            leftOpenValue={75}
+            stopLeftSwipe={75}
+            rightOpenValue={-75}
+          />
           <View style={styles.bottomContainer}>
             <View>
               <Text style={styles.price}>${totalPrice}</Text>
@@ -87,16 +92,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center"
   },
-  listItem: {
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white"
-  },
-  itemBody: {
-    flexDirection: "row",
-    alignItems: "center",
-    margin: 10
-  },
   bottomContainer: {
     position: "absolute",
     bottom: 0,
@@ -107,6 +102,19 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width,
     paddingHorizontal: 10,
     backgroundColor: "white"
+  },
+  hiddenSwipeContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    flex: 1
+  },
+  hiddenSwipeBtn: {
+    width: 60,
+    height: 60,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "red"
   }
 })
 

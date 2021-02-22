@@ -1,38 +1,16 @@
 const express = require("express");
-const {check, validationResult} = require("express-validator");
-const multer = require("multer");
+const formidable = require("formidable");
+const cloudinary = require("cloudinary").v2;
 const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
 const checkUserRole = require("../middlewares/checkRole");
 const router = express.Router();
 
-/*------------------------*/
-// Configuración de multer
-/*------------------------*/
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    let error = null;
-    const fileTypeCheck = file.mimetype.includes("jpg") || file.mimetype.includes("jpeg") || file.mimetype.includes("png");
-
-    if(!fileTypeCheck) {
-      error = "Invalid file type. File must be an image either .jpg or .jpeg or .png"
-    }
-
-    cb(error, "public/uploads");
-  },
-  filename: (req, file, cb) => {
-    // Eliminar la extensión del nombre original
-    const filenameArr = file.originalname.split(".");
-    filenameArr.splice(filenameArr.length - 1, 1);
-    // Reemplazar los espacios del nombre del archivo por guiones
-    const filename = filenameArr[0].split(" ").join("-").toLowerCase();
-    // Extraer la extensión del archivo
-    const extension = file.mimetype.split("/")[1];
-    cb(null, `${filename}-${Date.now()}.${extension}`)
-  }
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
-
-const upload = multer({storage});
 
 /*----------------------------------------*/
 // Consultar todos los productos existentes
@@ -94,61 +72,121 @@ router.get("/details/:productId", async (req, res) => {
 /*----------------*/
 // Crear productos
 /*----------------*/
-router.post("/", checkUserRole, upload.single("image"), [
-  check("name", "Product name is required").not().isEmpty(),
-  check("name", "Product name must be between 4 and 50 caracters").isLength({min: 4, max: 50}),
-  check("category", "Product category not found").isMongoId(),
-  check("countInStock", "You must specify the quantity in the stock for the product").not().isEmpty(),
-  check("countInStock", "The maximum quantity is 255").isInt({max: 255})
-], async (req, res) => {
-  const errors = validationResult(req);
-  if(!errors.isEmpty()) {
-    const message = errors.array({onlyFirstError: true})
-    return res.status(400).json({
-      status: "failed",
-      msg: message[0].msg
-    })
-  }
+router.post("/", checkUserRole, (req, res) => {
+  const form = new formidable.IncomingForm();
+  form.keepExtensions = true;
 
-  try {
-    if(!req.file) {
+  form.parse(req, async (error, fields, files) => {
+    if(error) {
       return res.status(400).json({
         status: "failed",
-        msg: "The product image is required"
+        msg: "Error processing the product data. Please, try again."
       })
     }
 
-    const filename = req.file.filename;
-    const basePath = `${req.protocol}://${req.get("host")}/public/upload`
-
-    const {name, description, richDescription, images, brand, price, category, countInStock, rating, numReviews, isFeatured} = req.body;
-
-    const checkCategory = await Category.findById(category);
-
-    if(!checkCategory) {
-      return res.status(404).json({
+    if(!files.image) {
+      return res.status(400).json({
         status: "failed",
-        msg: "Product category not found or deleted"
+        msg: "The product image is required."
       })
     }
 
-    const product = new Product({
-      name, description, richDescription, image: `${basePath}/${filename}`, images, brand, price, category, countInStock, rating, numReviews, isFeatured
-    });
+    if(!files.image.type.includes("jpg") && !files.image.type.includes("jpeg") && !files.image.type.includes("png")) {
+      return res.status(400).json({
+        status: "failed",
+        msg: "The image must be .jpg, .jpeg or .png."
+      })
+    }
 
-    await product.save();
+    if(files.image.size > 2000000) {
+      return res.status(400).json({
+        status: "failed",
+        msg: "Image size cannot be larger than 2mb"
+      })
+    }
 
-    res.json({
-      status: "success",
-      data: product
-    })
-    
-  } catch (error) {
-    res.status(500).json({
-      status: "failed",
-      msg: `Error: ${error.message}`
-    })
-  }
+    try {
+      const {name, description, richDescription, brand, price, category, countInStock, rating, numReviews, isFeatured} = fields;
+
+      // Validar la data requerida del formulario
+      const fieldsValidator = () => {
+        if(!name) {
+          return {
+            isValid: false,
+            msg: "Product name is required"
+          }
+        }
+
+        if(name.length < 4 || name.length > 50) {
+          return {
+            isValid: false,
+            msg: "Product name must be between 4 and 50 caracters"
+          }
+        }
+
+        if(!countInStock) {
+          return {
+            isValid: false,
+            msg: "You must specify the quantity in the stock for the product"
+          }
+        }
+
+        if(countInStock > 255) {
+          return {
+            isValid: false,
+            msg: "The maximum quantity is 255"
+          }
+        }
+
+        return {
+          isValid: true,
+          msg: null
+        }
+      }
+
+      if(!fieldsValidator().isValid) {
+        return res.status(400).json({
+          status: "failed",
+          msg: fieldsValidator().msg
+        })
+      }
+  
+      // Chequear si la categoría especificada existe en la base de datos
+      const checkCategory = await Category.findById(category);
+  
+      if(!checkCategory) {
+        return res.status(404).json({
+          status: "failed",
+          msg: "Product category not found or deleted"
+        })
+      }
+
+      // Generar una instancia del producto
+      const product = new Product({
+        name, description, richDescription, brand, price, category, countInStock, rating, numReviews, isFeatured
+      });
+
+      // Subir la imagen a Cloudinary
+      const uploadResponse = await cloudinary.uploader.upload(files.image.path, {folder: `easyshop/product-image/${brand}`});
+      product.image = uploadResponse.url;
+      product.imageId = uploadResponse.public_id;
+  
+      // Enviar el producto a la base de datos
+      await product.save();
+  
+      res.json({
+        status: "success",
+        data: product
+      })
+      
+    } catch (error) {
+      res.status(500).json({
+        status: "failed",
+        msg: `Error: ${error.message}`,
+        error
+      })
+    }
+  })
 });
 
 
@@ -158,14 +196,21 @@ router.post("/", checkUserRole, upload.single("image"), [
 router.delete("/:productId", checkUserRole, async (req, res) => {
   try {
     const {productId} = req.params;
-    const product = await Category.findByIdAndDelete(productId);
+    const product = await Product.findById(productId);
 
+    // Chequear si el producto existe en la base de  datos
     if(!product) {
       return res.status(404).json({
         status: "failed",
         msg: "Product not found or already deleted"
       })
     }
+
+    // Eliminar el producto dela base de datos
+    await product.delete();
+
+    // Eliminar la imagen del producto de Cloudinary
+    await cloudinary.uploader.destroy(product.imageId, {invalidate: true});
 
     res.json({
       status: "success",
@@ -175,7 +220,8 @@ router.delete("/:productId", checkUserRole, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: "failed",
-      msg: `Error: ${error.message}`
+      msg: `Error: ${error.message}`,
+      error
     })
   }
 });
@@ -231,37 +277,37 @@ router.patch("/:productId", checkUserRole, async (req, res) => {
 /*------------------------------------------*/
 // Subir la galería de imágenes del producto
 /*------------------------------------------*/
-router.patch("/product-gallery/:productId", checkUserRole, upload.array("images", 10), async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.productId);
+// router.patch("/product-gallery/:productId", checkUserRole, upload.array("images", 10), async (req, res) => {
+//   try {
+//     const product = await Product.findById(req.params.productId);
 
-    if(!product) {
-      return res.status(404).json({status: "failed", msg: "Product not found or deleted"})
-    }
+//     if(!product) {
+//       return res.status(404).json({status: "failed", msg: "Product not found or deleted"})
+//     }
 
-    const imagePaths = [];
-    const basePath = `${req.protocol}://${req.get("host")}/public/uploads`;
+//     const imagePaths = [];
+//     const basePath = `${req.protocol}://${req.get("host")}/public/uploads`;
 
-    req.files.forEach(file => {
-      imagePaths.push(`${basePath}/${file.filename}`)
-    });
+//     req.files.forEach(file => {
+//       imagePaths.push(`${basePath}/${file.filename}`)
+//     });
 
-    product.images = imagePaths;
-    await product.save();
+//     product.images = imagePaths;
+//     await product.save();
 
-    res.json({
-      status: "success",
-      msg: `Product "${product.name}" images uploaded successfully`,
-      data: product
-    })
+//     res.json({
+//       status: "success",
+//       msg: `Product "${product.name}" images uploaded successfully`,
+//       data: product
+//     })
     
-  } catch (error) {
-    res.status(500).json({
-      status: "failed",
-      msg: `Error: ${error.message}`
-    })
-  }
-})
+//   } catch (error) {
+//     res.status(500).json({
+//       status: "failed",
+//       msg: `Error: ${error.message}`
+//     })
+//   }
+// })
 
 
 /*-----------------------------*/

@@ -17,6 +17,23 @@
   "__v": 0
 },{
   "_id": {
+    "$oid": "5f15da13e520d44421ed8e9e"
+  },
+  "image": "https://i.pinimg.com/originals/3e/06/3d/3e063dbea335dd01a2b9f08e8483e221.png",
+  "brand": "Mobilix",
+  "price": 450,
+  "rating": 5,
+  "numReviews": null,
+  "isFeatured": true,
+  "name": "Sofa",
+  "description": "Big Sofa for living room",
+  "category": {
+    "$oid": "5f15d5b2cb4a6642bddc0fe7"
+  },
+  "countInStock": 2,
+  "__v": 0
+},{
+  "_id": {
     "$oid": "5f15d92ee520d44421ed8e9b"
   },
   "image": "",
@@ -65,22 +82,5 @@
     "$oid": "5f15d5b7cb4a6642bddc0fe8"
   },
   "countInStock": 5,
-  "__v": 0
-},{
-  "_id": {
-    "$oid": "5f15da13e520d44421ed8e9e"
-  },
-  "image": "https://i.pinimg.com/originals/3e/06/3d/3e063dbea335dd01a2b9f08e8483e221.png",
-  "brand": "Mobilix",
-  "price": 1000,
-  "rating": 5,
-  "numReviews": null,
-  "isFeatured": true,
-  "name": "Sofa",
-  "description": "Big Sofa for living room",
-  "category": {
-    "$oid": "5f15d5b2cb4a6642bddc0fe7"
-  },
-  "countInStock": 2,
   "__v": 0
 }]

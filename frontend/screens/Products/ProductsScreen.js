@@ -57,7 +57,12 @@ const ProductsScreen = (props) => {
 
   return (
     <Container>
-      <Header searchBar rounded androidStatusBarColor="#03bafc">
+      <Header
+        style={{backgroundColor: "#03bafc"}}
+        searchBar
+        rounded
+        androidStatusBarColor="#03bafc"
+      >
         <Item>
           <Icon name="md-search-sharp" />
           <Input

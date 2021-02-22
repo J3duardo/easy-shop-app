@@ -1,11 +1,11 @@
 import React from "react";
-import {View, Dimensions, StyleSheet, TouchableOpacity} from "react-native";
+import {View, Button, Dimensions, StyleSheet, TouchableOpacity} from "react-native";
 import {useNavigation} from "@react-navigation/native";
-import {Container, Text, Button, Left, Right, H1, ListItem, Thumbnail, Body} from "native-base";
+import {Container, Text, H1} from "native-base";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import {useSelector, useDispatch} from "react-redux";
 import {SwipeListView} from "react-native-swipe-list-view";
-import {addToCart, removeFromCart, clearCart} from "../../redux/actions/cartActions";
+import {removeFromCart, clearCart} from "../../redux/actions/cartActions";
 import CartItem from "../../components/CartItem";
 
 const Cart = () => {
@@ -51,15 +51,13 @@ const Cart = () => {
           />
           <View style={styles.bottomContainer}>
             <View>
-              <Text style={styles.price}>${totalPrice}</Text>
+              <Text style={styles.price}>Total: ${totalPrice}</Text>
             </View>
             <View style={{flexDirection: "row", flex: 1, justifyContent: "flex-end"}}>
-              <Button transparent style={{marginRight: 4}} onPress={() => navigation.navigate("Checkout")}>
-                <Text style={{color: "#03bafc"}}>Checkout</Text>
-              </Button>
-              <Button transparent onPress={() => dispatch(clearCart())}>
-                <Text style={{color: "#03bafc"}}>Clear cart</Text>
-              </Button>
+              <View style={{marginRight: 5}}>
+                <Button title="Checkout" color="#03bafc" onPress={() => navigation.navigate("Checkout")} />
+              </View>
+              <Button title="Clear cart" color="#03bafc" onPress={() => dispatch(clearCart())} />
             </View>
           </View>
         </Container>
@@ -70,9 +68,11 @@ const Cart = () => {
           <Text>Your cart is empty.</Text>
           <Text>Add products to your cart.</Text>
           <View style={{marginTop: 10}}>
-            <Button style={{backgroundColor: "#03bafc"}} onPress={() => navigation.navigate("Home")}>
-              <Text>Go to shop</Text>
-            </Button>
+            <Button
+              title="Go to shop"
+              color="#03bafc"
+              onPress={() => navigation.navigate("Home")}
+            />
           </View>
         </Container>
       )
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     position: "absolute",
-    bottom: 0,
+    bottom: 5,
     left: 0,
     flexDirection: "row",
     justifyContent: "space-between",

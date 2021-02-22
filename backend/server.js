@@ -38,10 +38,11 @@ mongoose.connect(process.env.MONGODB_URL, {
 
 mongoose.connection.on("connected", () => {
   console.log("Database connected successfully");
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
 });
 
 mongoose.connection.on("error", (error) => {
   console.log(`Error connecting to database: ${error.message}`);
   process.exit(1);
 });
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

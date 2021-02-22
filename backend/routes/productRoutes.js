@@ -80,7 +80,7 @@ router.post("/", checkUserRole, (req, res) => {
     if(error) {
       return res.status(400).json({
         status: "failed",
-        msg: "Error processing the product data. Please, try again."
+        msg: `Error processing the request: ${error.message}`
       })
     }
 
@@ -277,37 +277,122 @@ router.patch("/:productId", checkUserRole, async (req, res) => {
 /*------------------------------------------*/
 // Subir la galería de imágenes del producto
 /*------------------------------------------*/
-// router.patch("/product-gallery/:productId", checkUserRole, upload.array("images", 10), async (req, res) => {
-//   try {
-//     const product = await Product.findById(req.params.productId);
+router.patch("/product-gallery/:productId", checkUserRole, (req, res) => {
+  const form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+  form.multiples = true;
+  
+  form.parse(req, async (error, fields, files) => {
+    if(error) {
+      res.status(400).json({
+        status: "failed",
+        msg: `Error processing the request: ${error.message}`
+      })
+    }
 
-//     if(!product) {
-//       return res.status(404).json({status: "failed", msg: "Product not found or deleted"})
-//     }
+    const checkImageType = (data) => {
+      return !data.type.includes("jpg") && !data.type.includes("jpeg") && !data.type.includes("png")
+    }
 
-//     const imagePaths = [];
-//     const basePath = `${req.protocol}://${req.get("host")}/public/uploads`;
+    try {
+      const imagesData = files.images;
 
-//     req.files.forEach(file => {
-//       imagePaths.push(`${basePath}/${file.filename}`)
-//     });
+      // Chequear si el producto existe en la base de datos
+      const product = await Product.findById(req.params.productId);
+      if(!product) {
+        return res.status(404).json({
+          status: "failed",
+          msg: "Product not found or deleted"
+        })
+      }
 
-//     product.images = imagePaths;
-//     await product.save();
+      // Chequear si se subió al menos una imagen
+      if(!Array.isArray(imagesData) && imagesData.size === 0) {
+        return res.status(400).json({
+          status: "failed",
+          msg: "You must upload at least one image"
+        })
+      }
 
-//     res.json({
-//       status: "success",
-//       msg: `Product "${product.name}" images uploaded successfully`,
-//       data: product
-//     })
-    
-//   } catch (error) {
-//     res.status(500).json({
-//       status: "failed",
-//       msg: `Error: ${error.message}`
-//     })
-//   }
-// })
+      /*--------------------------------------------------------------*/
+      // Procesar la subida individual si se selecciona una sola imagen
+      /*--------------------------------------------------------------*/
+      if(!Array.isArray(imagesData)) {
+        // Validar el formato de la imagen
+        if(checkImageType(imagesData)) {
+          return res.status(400).json({
+            status: "failed",
+            msg: "The image type must be .jpg, .jpeg or .png."
+          })
+        }
+
+        // Validar el tamaño de la imagen
+        if(imagesData.size > 2000000) {
+          return res.status(400).json({
+            status: "failed",
+            msg: "Image size cannot be larger than 2mb"
+          })
+        }
+
+        // Subir la imagen a Cloudinary y actualizar el producto correspondiente
+        const uploadResponse = await cloudinary.uploader.upload(imagesData.path, {folder: `easyshop/product-gallery/${product.name}`});
+        product.images = [...product.images, {url: uploadResponse.url, imageId: uploadResponse.public_id}];
+        await product.save();
+      }
+
+      /*--------------------------------------------------------------*/
+      // Procesar la subida múltiple si se selecciona más de una imagen
+      /*--------------------------------------------------------------*/
+      if(Array.isArray(imagesData)) {
+
+        // Chequear que todas las imágenes sean del formato válido
+        // Retorna error si al menos una no cumple la condición
+        imagesData.forEach(image => {
+          if(checkImageType(image)) {
+            return res.status(400).json({
+              status: "failed",
+              msg: "All selected images must be type .jpg, .jpeg or .png."
+            })
+          }
+        });
+
+        // Validar el tamaño de las imágenes
+        // Retorna error si al menos una no cumple la condición
+        imagesData.forEach(image => {
+          if(image.size > 2000000) {
+            return res.status(400).json({
+              status: "failed",
+              msg: "Image size cannot be larger than 2mb"
+            })
+          }
+        });
+
+        // Subir cada imagen a Cloudinary de forma síncrona y pushear cada resultado al array
+        const multiUploadResult = [];
+
+        for(let image of imagesData) {
+          const res = await cloudinary.uploader.upload(image.path, {folder: `easyshop/product-gallery/${product.name}`});
+          multiUploadResult.push({url: res.url, imageId: res.public_id})
+        }
+
+        // Actualizar la galería del producto
+        product.images = [...product.images, ...multiUploadResult];
+        await product.save();
+      }
+
+      res.json({
+        status: "success",
+        data: product
+      })
+      
+    } catch (error) {
+      res.status(500).json({
+        status: "failed",
+        msg: `Error: ${error.message}`
+      })
+    }
+  })
+});
 
 
 /*-----------------------------*/

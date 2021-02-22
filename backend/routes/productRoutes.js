@@ -212,9 +212,17 @@ router.delete("/:productId", checkUserRole, async (req, res) => {
     // Eliminar la imagen del producto de Cloudinary
     await cloudinary.uploader.destroy(product.imageId, {invalidate: true});
 
+    // Eliminar la galería del producto de Cloudinary
+    const galleryImagesIds = product.images.map(img => img.imageId);
+    if(galleryImagesIds.length > 0) {
+      for(let imageId of galleryImagesIds) {
+        await cloudinary.uploader.destroy(imageId, {invalidate: true});
+      }
+    }
+
     res.json({
       status: "success",
-      data: product
+      data: `Product "${product.name}" deleted successfully`
     })
     
   } catch (error) {

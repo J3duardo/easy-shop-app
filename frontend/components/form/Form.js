@@ -22,6 +22,11 @@ const styles = StyleSheet.create({
   title: {
     marginBottom: 10,
     fontSize: 30
+  },
+  errorMsg: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "red"
   }
 })
 

@@ -40,6 +40,38 @@ router.get("/", async (req, res) => {
 });
 
 
+/*------------------------------------------------*/
+// Consultar productos de una categoría específica
+/*------------------------------------------------*/
+router.get("/category/:categoryId", async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.categoryId);
+
+    // Chequear si la categoría existe
+    if(!category) {
+      return res.status(404).json({
+        status: "failed",
+        msg: "Category not found"
+      })
+    }
+
+    // Buscar los productos de la categoría especificada
+    const products = await Product.find({category: req.params.categoryId});
+
+    res.json({
+      status: "success",
+      data: products
+    })
+    
+  } catch (error) {
+    res.status(500).json({
+      status: "failed",
+      msg: `Error: ${error.message}`
+    })
+  }
+})
+
+
 /*--------------------------------*/
 // Consultar un producto por su id
 /*--------------------------------*/

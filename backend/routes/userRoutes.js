@@ -35,15 +35,25 @@ router.post("/signup", [
     })
   }
 
+  
   try {
-    const {name, email, password, phone, isAdmin, apartment, zip, city, country} = req.body;
+    const {name, email, password, passwordConfirm, phone, zip, city, country} = req.body;
+
+    // Chequear si existe un usuario para el email ingresado
+    const checkUser = await User.findOne({email});
+    if(checkUser) {
+      return res.status(400).json({
+        status: "failed",
+        msg: "User already exists. Try another email address."
+      })
+    }
+
     const user = new User({
       name,
-      email,
+      email: email.toLowerCase(),
       password,
+      passwordConfirm,
       phone,
-      isAdmin,
-      apartment,
       zip,
       city,
       country
@@ -87,7 +97,8 @@ router.post("/login", [
   }
 
   try {
-    const user = await User.findOne({email: req.body.email});
+    const email = req.body.email && req.body.email.toLowerCase();
+    const user = await User.findOne({email});
 
     if(!user) {
       return res.status(404).json({

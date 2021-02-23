@@ -1,9 +1,9 @@
 import React, {useState} from "react";
-import {View, ScrollView, StyleSheet, Dimensions, ActivityIndicator} from "react-native";
-import {Text, Left, Right, ListItem, Thumbnail, Body} from "native-base";
+import {View, ScrollView, StyleSheet, Dimensions} from "react-native";
+import {Text, ListItem, Thumbnail} from "native-base";
 import {useDispatch} from "react-redux";
 import {clearCart} from "../../redux/actions/cartActions";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import TouchableCta from "../../components/TouchableCta";
 
 const ConfirmPayment = (props) => {
   const order = props.route.params && props.route.params.order;
@@ -70,16 +70,8 @@ const ConfirmPayment = (props) => {
               })}
             </View>
 
-            <View style={styles.cta}>
-              <TouchableOpacity disabled={isLoading} onPress={confirmOrderHandler}>
-                {!isLoading &&
-                  <Text style={{textTransform: "uppercase", fontSize: 14, color: "white"}}>
-                    Place order
-                  </Text>
-                }
-              </TouchableOpacity>
-              {isLoading && <ActivityIndicator color="white" animating={isLoading} />}
-            </View>
+            {/* Enviar la orden */}
+            <TouchableCta title="Place order" isLoading={isLoading} onSubmitHandler={confirmOrderHandler} />
           </React.Fragment>
         }
       </View>
@@ -132,16 +124,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     borderColor: "rgba(0,0,0,0.2)",
     backgroundColor: "rgba(0,0,0,0.1)"
-  },
-  cta: {
-    width: 120,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 15,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    backgroundColor: "#03bafc"
   }
 })
 

@@ -11,7 +11,7 @@ const SearchResults = (props) => {
           return (
             <ListItem
               avatar
-              key={item._id.$oid}
+              key={item._id}
               onPress={() => props.navigation.navigate("Product Details", {item})}
             >
               <Left>

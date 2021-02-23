@@ -16,7 +16,7 @@ const CartItem = (props) => {
       style={styles.listItem}
       avatar
     >
-      <Left>
+      <Left style={{alignSelf: "center", marginBottom: 5}}>
         <Thumbnail
           source={{uri: item.image ? item.image : "https://cdn.pixabay.com/photo/2012/04/01/17/29/box-23649_960_720.png"}}
         />
@@ -37,12 +37,14 @@ const styles = StyleSheet.create({
   listItem: {
     justifyContent: "center",
     alignItems: "center",
+    marginLeft: 0,
     backgroundColor: "white"
   },
   itemBody: {
     flexDirection: "row",
     alignItems: "center",
-    margin: 10
+    margin: 10,
+    borderBottomColor: "transparent"
   },
 });
 

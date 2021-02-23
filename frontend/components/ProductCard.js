@@ -12,7 +12,7 @@ const ProductCard = (props) => {
   // Chequear si el item ya fue agregado al cart
   /*--------------------------------------------*/
   const isAddedToCart = () => {
-    return items.findIndex(item => item._id.$oid === props.item._id.$oid) > -1
+    return items.findIndex(item => JSON.stringify(item._id) === JSON.stringify(props.item._id)) > -1
   }
 
   return (
@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent"
   },
   title: {
+    marginTop: 10,
     fontWeight: "bold",
     fontSize: 14,
     textAlign: "center"

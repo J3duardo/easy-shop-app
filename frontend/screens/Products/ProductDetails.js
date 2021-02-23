@@ -1,11 +1,21 @@
 import React,{useState, useEffect} from "react";
 import {View, Text, Button, Image, StyleSheet, ScrollView} from "react-native";
 import {Left, Right, Container, H1} from "native-base";
+import {useDispatch, useSelector} from "react-redux";
+import {addToCart} from "../../redux/actions/cartActions";
 
 const ProductDetails = (props) => {
   const {item} = props.route.params;
+  const dispatch = useDispatch();
+  const items = useSelector((state) => state.cart.items);
+
   const [currentProduct, setCurrentProduct] = useState(item);
   const [isAvailable, setIsAvailable] = useState(null);
+
+  // Chequear si el producto ya fue agregado al carrito
+  const isAdded = (id) => {
+    return items.findIndex(item => item._id === id)
+  }
 
   useEffect(() => {
 
@@ -35,7 +45,11 @@ const ProductDetails = (props) => {
         </Left>
         <Right>
           <View style={styles.bottomBtnWrapper}>
-            <Button title="Add"/>
+            <Button
+              title={`${isAdded(item._id) !== -1 ? "Added" : "Add to cart"}`}
+              disabled={isAdded(item._id) !== -1}
+              onPress={() => dispatch(addToCart(item))}
+            />
           </View>
         </Right>
       </View>
@@ -60,14 +74,16 @@ const styles = StyleSheet.create({
   },
   contentWrapper: {
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   contentHeader: {
     marginBottom: 10,
+    textAlign: "center",
     fontWeight: "bold"
   },
   contentText: {
     marginBottom: 20,
+    textAlign: "center",
     fontSize: 18,
     fontWeight: "bold"
   },
@@ -85,7 +101,7 @@ const styles = StyleSheet.create({
     color: "red"
   },
   bottomBtnWrapper: {
-    width: 60,
+    minWidth: 60,
   }
 })
 

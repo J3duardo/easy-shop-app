@@ -24,8 +24,10 @@ const Cart = () => {
         <Container>
           <H1 style={{alignSelf: "center"}}>Cart</H1>
           <SwipeListView
-            keyExtractor={(item) => item._id.$oid}
+            contentContainerStyle={{paddingBottom: 50, paddingLeft: 10}}
+            keyExtractor={(item) => item._id}
             data={cartItems}
+            ItemSeparatorComponent={() => <View style={{height: 1, backgroundColor: "#eee"}}/>}
             renderItem={(item) => {
               return <CartItem item={item} />
             }}
@@ -34,9 +36,9 @@ const Cart = () => {
                 <View style={styles.hiddenSwipeContainer}>
                   <TouchableOpacity
                     style={styles.hiddenSwipeBtn}
-                    onPress={() => dispatch(removeFromCart(item.item._id.$oid))}
+                    onPress={() => dispatch(removeFromCart(item.item._id))}
                   >
-                    <Icon name="trash" color="white" size={24} />
+                    <Icon name="trash" color="red" size={30} />
                   </TouchableOpacity>
                 </View>
               )
@@ -94,27 +96,31 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     position: "absolute",
-    bottom: 5,
+    bottom: 0,
     left: 0,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     width: Dimensions.get("window").width,
     paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderTopColor: "rgba(0,0,0,0.1)",
+    borderTopWidth: 1,
     backgroundColor: "white"
   },
   hiddenSwipeContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    flex: 1
+    flex: 1,
+    marginRight: 10
   },
   hiddenSwipeBtn: {
     width: 60,
-    height: 60,
+    height: 80,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "red"
+    alignSelf: "center"
   }
 })
 

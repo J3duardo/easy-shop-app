@@ -10,9 +10,9 @@ const CategoryFilter = (props) => {
     
     return (
       <TouchableOpacity
-        key={_id.$oid}
+        key={_id}
         onPress={() => {
-          props.categoryFilterHandler(_id.$oid);
+          props.setActiveCategoryId(_id);
           props.setActive(name);
         }}
       >
@@ -42,6 +42,7 @@ const CategoryFilter = (props) => {
       <ListItem
         style={{borderRadius: 0}}
       >
+        {categoryBadgeRender({_id: "all", name: "All"})}
         {props.categories.map(category => categoryBadgeRender(category))}
       </ListItem>
     </ScrollView>

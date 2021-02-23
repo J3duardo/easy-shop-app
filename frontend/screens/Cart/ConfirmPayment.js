@@ -54,20 +54,17 @@ const ConfirmPayment = (props) => {
               {order.orderItems.map(item => {
                 return (
                   <ListItem
+
                     style={styles.listItem}
                     key={item.name}
                   >
-                    <Left>
+                    <View style={styles.thumbnailContainer}>
                       <Thumbnail source={{uri: item.image}} />
-                    </Left>
-                    <Body style={styles.body}>
-                      <Left>
-                        <Text>{item.name}</Text>
-                      </Left>
-                      <Right>
-                        <Text>${item.price}</Text>
-                      </Right>
-                    </Body>
+                    </View>
+                    <View style={styles.body}>
+                      <Text style={{flexShrink: 1, marginRight: 10}}>{item.name}</Text>
+                      <Text style={{flexShrink: 0, textAlign: "right"}}>${item.price}</Text>
+                    </View>
                   </ListItem>
                 )
               })}
@@ -114,15 +111,27 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1
   },
   listItem: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 5,
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
     marginLeft: 0,
     backgroundColor: "white"
   },
   body: {
+    flex: 1,
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginLeft: 5,
+  },
+  thumbnailContainer: {
+    marginRight: 10,
+    padding: 4,
+    borderWidth: 1,
+    borderRadius: 100,
+    borderColor: "rgba(0,0,0,0.2)",
+    backgroundColor: "rgba(0,0,0,0.1)"
   },
   cta: {
     width: 120,

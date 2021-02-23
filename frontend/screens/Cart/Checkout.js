@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {View, Button, StyleSheet} from "react-native";
+import {View, Text, Button, StyleSheet} from "react-native";
 import {Item, Picker} from "native-base";
 import Icon from "react-native-vector-icons";
 import {useSelector} from "react-redux";
@@ -20,13 +20,43 @@ const Checkout = (props) => {
   const [country, setCountry] = useState("");
   const [phone, setPhone] = useState("");
   const [countries, setCountries] = useState(countriesData);
+  const [error, setError] = useState(null);
+  const [serverResponseError, setServerResponseError] = useState(null);
 
   useEffect(() => {
     setOrderItems(items);
     return () => setOrderItems([]);
   }, [items]);
 
+  
+  // Validar campos y procesar la orden
   const orderHandler = () => {
+    setError(null);
+
+    if(!phone.length) {
+      return setError({type: "phone", msg: "You must provide your phone"})
+    }
+    
+    if(!address.length) {
+      return setError({type: "shippingAddress", msg: "Your address is required"})
+    }
+
+    if(!secondAddress.length) {
+      return setError({type: "shippingAddress2", msg: "Your address is required"})
+    }
+
+    if(!city.length) {
+      return setError({type: "city", msg: "Your city is required"})
+    }
+
+    if(!zip.length) {
+      return setError({type: "zip", msg: "The zip code is required"})
+    }
+
+    if(!country.length) {
+      return setError({type: "country", msg: "You must provide your country"})
+    }
+
     const order = {
       city,
       country,
@@ -37,15 +67,7 @@ const Checkout = (props) => {
       zip
     }
 
-    return order;
-  }
-  
-  // Chequear si todos los campos del formulario fueron completados
-  const isValid = () => {
-    if(!address || !secondAddress || !city || !zip || !phone || !country) {
-      return false
-    }
-    return true;
+    return navigate("Payment", {order});
   }
 
   return (
@@ -54,39 +76,67 @@ const Checkout = (props) => {
       extraHeight={200}
       enableOnAndroid={true}
     >
-      <Form title="Shipping Address">
+      <Form
+        title="Shipping Address"
+        serverResponseError={serverResponseError}
+      >
         <Input
           placeholder="Phone"
           name="phone"
+          id="phone"
           value={phone}
-          keyboardType="numeric"
-          onChangeHandler={(text) => setPhone(text)}
+          keyboardType="phone-pad"
+          onChangeHandler={setPhone}
+          clearErrors={() => setError(null)}
+          validationError={error && error.type === "phone"}
         />
+        {error && error.type === "phone" && <Text style={styles.errorMsg}>{error.msg}</Text>}
+
         <Input
-          placeholder="Shiping Address 1"
+          placeholder="Shipping Address 1"
           name="shippingAddress"
+          id="shippingAddress"
           value={address}
-          onChangeHandler={(text) => setAddress(text)}
+          onChangeHandler={setAddress}
+          clearErrors={() => setError(null)}
+          validationError={error && error.type === "shippingAddress"}
         />
+        {error && error.type === "shippingAddress" && <Text style={styles.errorMsg}>{error.msg}</Text>}
+        
         <Input
-          placeholder="Shiping Address 2"
+          placeholder="Shipping Address 2"
           name="shippingAddress2"
+          id="shippingAddress2"
           value={secondAddress}
-          onChangeHandler={(text) => setSecondAddress(text)}
+          onChangeHandler={setSecondAddress}
+          clearErrors={() => setError(null)}
+          validationError={error && error.type === "shippingAddress2"}
         />
+        {error && error.type === "shippingAddress2" && <Text style={styles.errorMsg}>{error.msg}</Text>}
+
         <Input
           placeholder="City"
           name="city"
+          id="city"
           value={city}
-          onChangeHandler={(text) => setCity(text)}
+          onChangeHandler={setCity}
+          clearErrors={() => setError(null)}
+          validationError={error && error.type === "city"}
         />
+        {error && error.type === "city" && <Text style={styles.errorMsg}>{error.msg}</Text>}
+
         <Input
           placeholder="Zip code"
           name="zip"
+          id="zip"
           value={zip}
           keyboardType="numeric"
-          onChangeHandler={(text) => setZip(text)}
+          onChangeHandler={setZip}
+          clearErrors={() => setError(null)}
+          validationError={error && error.type === "zip"}
         />
+        {error && error.type === "zip" && <Text style={styles.errorMsg}>{error.msg}</Text>}
+        
         <Item picker style={{width: "80%", marginBottom: 20}}>
           <Picker
             mode="dropdown"
@@ -95,7 +145,7 @@ const Checkout = (props) => {
             placeholder="Select your country"
             placeholderStyle={{color: "#007aaf"}}
             placeholderIconColor="#007aaf"
-            onValueChange={(e) => setCountry(e)}
+            onValueChange={(e) => {setCountry(e); error && error.type === "country" && setError(null)}}
           >
             {countries.map(country => {
               return (
@@ -108,12 +158,14 @@ const Checkout = (props) => {
             })}
           </Picker>
         </Item>
+        {error && error.type === "country" && <Text style={styles.errorMsg}>{error.msg}</Text>}
+
         <View style={{width: "80%", alignItems: "center"}}>
           <Button
-            title={`${!isValid() ? "Complete all fields" : "Confirm"}`}
+            title="Confirm"
             color="#03bafc"
-            disabled={!isValid()}
-            onPress={() => navigate("Payment", {order: orderHandler()})}
+            // disabled={!isValid()}
+            onPress={orderHandler}
           />
         </View>
       </Form>
@@ -121,6 +173,15 @@ const Checkout = (props) => {
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  errorMsg: {
+    marginBottom: 15,
+    textAlign: "center",
+    color: "red"
+  },
+  invalidInputStyle: {
+    borderColor: "red"
+  }
+});
 
 export default Checkout;

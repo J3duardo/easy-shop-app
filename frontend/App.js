@@ -7,6 +7,7 @@ import axios from "axios";
 import {Provider} from "react-redux";
 import store from "./redux/reduxStore";
 import baseUrl from "./api/baseUrl";
+import { navigationRef } from "./navigationRef";
 
 axios.defaults.baseURL = baseUrl;
 
@@ -15,12 +16,12 @@ axios.defaults.baseURL = baseUrl;
 const App = () => {
   return (
     <Root>
-      <Provider store={store}>
-        <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
+        <Provider store={store}>
           <CustomHeader />
           <TabsNavigator />
-        </NavigationContainer>
-      </Provider>
+        </Provider>
+      </NavigationContainer>
     </Root>
   );
 }

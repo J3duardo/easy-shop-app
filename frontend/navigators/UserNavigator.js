@@ -27,7 +27,8 @@ const UserNavigator = () => {
         name="UserProfile"
         component={UserProfile}
         options={{
-          headerShown: true
+          title: "User profile",
+          headerShown: false
         }}
       />
     </Stack.Navigator>

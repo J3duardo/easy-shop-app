@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import {navigate} from "../../navigationRef";
 import {USER_TYPES} from "../types";
 
 const userAuthStart = () => {
@@ -80,6 +81,7 @@ export const userLogin = (userData) => {
       const userString = JSON.stringify(user);  
       await AsyncStorage.multiSet([["user", userString], ["token", token]]);
       dispatch(userAuthSuccess(user, token));
+      navigate("UserProfile");
 
     } catch (err) {
       let message = err.message;

@@ -35,7 +35,6 @@ const ProductsScreen = (props) => {
         .then(results => {
           const token = results[0][1];
           const user = JSON.parse(results[1][1]);
-          console.log({token, user});
           token && user && dispatch(userAuthSuccess(user, token));
         })
       }
@@ -167,7 +166,7 @@ const ProductsScreen = (props) => {
           />
         </Item>
       </Header>
-
+      
       {term ?
         <SearchResults items={filteredProducts} navigation={props.navigation} />
         :

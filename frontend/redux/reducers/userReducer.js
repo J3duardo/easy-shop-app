@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {USER_TYPES} from "../types";
 
 const initialState = {
@@ -8,7 +7,7 @@ const initialState = {
   authError: null
 }
 
-const cartReducer = async (state = initialState, action) => {
+const cartReducer = (state = initialState, action) => {
   switch(action.type) {
     case USER_TYPES.USER_AUTH_START:
       return {...state, isLoading: true, authError: null}
@@ -29,7 +28,6 @@ const cartReducer = async (state = initialState, action) => {
         authError: action.payload
       }
     case USER_TYPES.USER_LOGOUT:
-      await AsyncStorage.multiRemove(["token", "user"]);
       return {
         user: null,
         token: null,

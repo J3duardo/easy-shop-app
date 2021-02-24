@@ -19,8 +19,13 @@ const Login = (props) => {
   
   /*----------------------------------------------*/
   // Limpiar el state local al salir de la pantalla
+  // Redirigir si ya está logueado
   /*----------------------------------------------*/
   useEffect(() => {
+    if(user && token) {
+      navigate("UserProfile")
+    }
+
     const clearState = props.navigation.addListener("blur", () => {
       setEmail("");
       setPassword("");
@@ -66,8 +71,7 @@ const Login = (props) => {
         position: "bottom",
         style: {minHeight: 80},
         type: "success",
-        duration: 4000,
-        onClose: () => navigate("Home")
+        duration: 4000
       });
     }
 

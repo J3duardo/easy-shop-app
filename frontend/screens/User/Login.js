@@ -1,19 +1,21 @@
 import React, {useEffect, useState} from "react";
-import {View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Dimensions} from "react-native";
+import {Text, TouchableOpacity, StyleSheet, Dimensions} from "react-native";
 import {Toast} from "native-base";
-import axios from "axios";
+import {useSelector, useDispatch} from "react-redux";
 import Form from "../../components/form/Form";
 import Input from "../../components/form/Input";
 import TouchableCta from "../../components/TouchableCta";
 import {regExp} from "../../utils/emailValidator";
+import {userLogin, clearErrors} from "../../redux/actions/userActions";
 
 const Login = (props) => {
   const {navigate} = props.navigation;
+  const dispatch = useDispatch();
+  const {user, token, isLoading, authError} = useSelector((state) => state.auth);
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   
   /*----------------------------------------------*/
   // Limpiar el state local al salir de la pantalla
@@ -23,19 +25,17 @@ const Login = (props) => {
       setEmail("");
       setPassword("");
       setError(null);
-      setIsLoading(false);
+      Toast.hide();
     });
 
     return () => clearState();
-
-  }, [props.navigation]);
+  }, []);
 
 
   /*--------------------------------------------------*/
   // Validar los campos y procesar el login del usuario
   /*--------------------------------------------------*/
   const onSubmitHandler = async () => {
-    const user = {email, password}
     setError(null);
 
     if(!email.length) {
@@ -50,24 +50,17 @@ const Login = (props) => {
       return setError({type: "password", msg: "Password is required"})
     }
 
-    try {
-      setIsLoading(true);
+    dispatch(userLogin({email, password}));
+  }
 
-      const res = await axios({
-        method: "POST",
-        url: "/user/login",
-        data: user,
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
 
-      setIsLoading(false);
-      const userData = res.data.data.user;
-      const token = res.data.data.token;
-
+  /*------------------------------------------------------------------*/
+  // Mostrar notificaciones toast y redirigir en caso de login exitoso
+  /*------------------------------------------------------------------*/
+  useEffect(() => {
+    if(user && token && !authError) {
       Toast.show({
-        text: `Welcome back ${userData.name}`,
+        text: `Welcome back ${user.name.split(" ")[0]}`,
         buttonText: "OK",
         buttonStyle: {alignSelf: "center"},
         position: "bottom",
@@ -76,25 +69,22 @@ const Login = (props) => {
         duration: 4000,
         onClose: () => navigate("Home")
       });
-      
-    } catch (error) {
-      let message = error.message;
-      if(error.response) {
-        message = error.response.data.msg
-      }
-      setIsLoading(false);
+    }
 
+    if(authError) {
       Toast.show({
-        text: message,
+        text: authError,
         buttonText: "OK",
         buttonStyle: {alignSelf: "center"},
         position: "bottom",
         style: {minHeight: 80},
         type: "danger",
-        duration: 9000
+        duration: 8000,
+        onClose: () => dispatch(clearErrors())
       })
     }
-  }
+
+  }, [user, token, authError]);
 
   return (
     <Form title="Login">

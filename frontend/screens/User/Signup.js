@@ -1,17 +1,20 @@
 import React, {useState, useEffect} from "react";
-import {View, Text, TouchableOpacity, StyleSheet, Dimensions} from "react-native";
+import {Text, TouchableOpacity, StyleSheet, Dimensions} from "react-native";
 import {Item, Picker, Toast} from "native-base";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import Icon from "react-native-vector-icons";
-import axios from "axios";
+import {useSelector, useDispatch} from "react-redux";
 import Form from "../../components/form/Form";
 import Input from "../../components/form/Input";
 import {regExp} from "../../utils/emailValidator";
 import countriesData from "../../assets/countries.json";
 import TouchableCta from "../../components/TouchableCta";
+import {userSignup, clearErrors} from "../../redux/actions/userActions";
 
 const Signup = (props) => {
   const {navigate} = props.navigation;
+  const dispatch = useDispatch();
+  const {user, token, isLoading, authError} = useSelector((state) => state.auth);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -23,7 +26,6 @@ const Signup = (props) => {
   const [country, setCountry] = useState("");
   const [countries, setCountries] = useState(countriesData);
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   /*----------------------------------------------*/
   // Limpiar el state local al salir de la pantalla
@@ -38,15 +40,17 @@ const Signup = (props) => {
       setZip("");
       setCountry("");
       setError(null);
-      setIsLoading(false);
+      Toast.hide();
     });
 
     return () => clearState();
+  }, []);
 
-  }, [props.navigation]);
 
+  /*------------------------------------------------------*/
+  // Validar los campos y procesar el registro del usuario
+  /*------------------------------------------------------*/
   const onSubmitHandler = async () => {
-    const user = {name, email, password, passwordConfirm, phone, zip, country}
     setError(null);
 
     if(!name.length) {
@@ -89,24 +93,18 @@ const Signup = (props) => {
       return setError({type: "country", msg: "You must select your country"})
     }
 
-    try {
-      setIsLoading(true);
+    dispatch(userSignup({name, email, password, passwordConfirm, phone, zip, city, country}));
+  }
 
-      const res = await axios({
-        method: "POST",
-        url: "/user/signup",
-        data: {name, email, password, passwordConfirm, zip, phone, city, country},
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-      
-      setIsLoading(false);
-      const userData = res.data.data.user;
-      const token = res.data.data.token;
 
+  /*---------------------------------------------------------------------*/
+  // Mostrar notificaciones toast y redirigir en caso de registro exitoso
+  /*---------------------------------------------------------------------*/
+  useEffect(() => {
+    if(!authError && token && user) {
+      console.log({token, user});
       Toast.show({
-        text: `Welcome ${userData.name.split(" ")[0]}, your account was created successfully.`,
+        text: `Welcome ${user.name.split(" ")[0]}, your account was created successfully.`,
         buttonText: "OK",
         buttonStyle: {alignSelf: "center"},
         position: "bottom",
@@ -115,26 +113,22 @@ const Signup = (props) => {
         duration: 8000,
         onClose: () => navigate("Home")
       });
-
-    } catch (error) {
-      let message = error.message;
-      if(error.response) {
-        message = error.response.data.msg
-      }
-
-      setIsLoading(false);
-
+    }
+    
+    if(authError) {
+      console.log({authError});
       Toast.show({
-        text: message,
+        text: authError,
         buttonText: "OK",
         buttonStyle: {alignSelf: "center"},
         position: "bottom",
         style: {minHeight: 80},
         type: "danger",
-        duration: 9000
+        duration: 8000,
+        onClose: () => dispatch(clearErrors())
       })
     }
-  }
+  }, [user, token, authError])
 
   return (
     <KeyboardAwareScrollView

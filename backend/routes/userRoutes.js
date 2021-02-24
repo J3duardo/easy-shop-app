@@ -121,6 +121,8 @@ router.post("/login", [
       {expiresIn: "7 days"}
     );
 
+    user.password = undefined;
+
     res.json({
       status: "success",
       data: {token, user}

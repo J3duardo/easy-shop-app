@@ -8,7 +8,7 @@ const userAuthStart = () => {
   }
 }
 
-const userAuthSuccess = (user, token) => {
+export const userAuthSuccess = (user, token) => {
   return {
     type: USER_TYPES.USER_AUTH_SUCCESS,
     payload: {user, token}

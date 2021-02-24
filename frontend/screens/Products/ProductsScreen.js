@@ -1,14 +1,19 @@
 import React, {useState, useEffect, useCallback} from "react";
-import {View, FlatList, Text, Dimensions, ScrollView, ActivityIndicator} from "react-native";
+import {View, FlatList, Text, Dimensions, ScrollView, ActivityIndicator, AppState} from "react-native";
 import {Container, Header, Icon, Item, Input} from "native-base";
 import {useFocusEffect} from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import {useDispatch} from "react-redux";
 import ProductListItem from "../../components/ProductListItem";
 import SearchResults from "./SearchResults";
 import CustomBanner from "../../components/CustomBanner";
 import CategoryFilter from "./CategoryFilter";
+import {userAuthSuccess} from "../../redux/actions/userActions";
 
 const ProductsScreen = (props) => {
+  const dispatch = useDispatch();
+
   const [categories, setCategories] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [productsByCategory, setProductsByCategory] = useState([]);
@@ -17,6 +22,25 @@ const ProductsScreen = (props) => {
   const [term, setTerm] = useState(null);
   const [filteredProducts, setFilteredProducts] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+
+  /*----------------------------------------------------------------------------------------*/
+  // Chequear si el usuario está autenticado al abrir la app o pasarla de backgound a active
+  /*----------------------------------------------------------------------------------------*/
+  useEffect(() => {
+    AppState.addEventListener("change", (e) => {
+      console.log({CurrentState: e});
+      if(e === "active") {
+        AsyncStorage.multiGet(["token", "user"])
+        .then(results => {
+          const token = results[0][1];
+          const user = JSON.parse(results[1][1]);
+          console.log({token, user});
+          token && user && dispatch(userAuthSuccess(user, token));
+        })
+      }
+    });
+  }, []);
 
 
   /*-------------------------------------*/
@@ -143,6 +167,7 @@ const ProductsScreen = (props) => {
           />
         </Item>
       </Header>
+
       {term ?
         <SearchResults items={filteredProducts} navigation={props.navigation} />
         :
@@ -169,6 +194,7 @@ const ProductsScreen = (props) => {
               setActive={setActive}
             />
           </View>
+
           {!isLoading && productsByCategory.length > 0 ?
             <View style={{marginBottom: 10}}>
               <FlatList

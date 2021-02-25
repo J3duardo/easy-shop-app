@@ -4,6 +4,7 @@ import Products from "../screens/Admin/Products";
 import Orders from "../screens/Admin/Orders";
 import Categories from "../screens/Admin/Categories";
 import ProductForm from "../screens/Admin/ProductForm";
+import ProductDetails from "../screens/Products/ProductDetails";
 
 const Stack = createStackNavigator();
 
@@ -14,7 +15,15 @@ const AdminNavigator = () => {
         name="Products"
         component={Products}
         options={{
-          title: "Products",
+          title: "Admin Products",
+          headerShown: true
+        }}
+      />
+      <Stack.Screen
+        name="Details"
+        component={ProductDetails}
+        options={{
+          title: "Product Details",
           headerShown: true
         }}
       />

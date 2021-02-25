@@ -1,6 +1,6 @@
 import React,{useState} from "react";
 import {View, Text, Button, Image, StyleSheet, ScrollView, TouchableOpacity} from "react-native";
-import {Left, Right, Container, H1, Icon} from "native-base";
+import {Left, Right, Container, H1} from "native-base";
 import {useDispatch, useSelector} from "react-redux";
 import {addToCart} from "../../redux/actions/cartActions";
 
@@ -22,22 +22,7 @@ const ProductDetails = (props) => {
   return (
     <Container style={styles.container}>
       <ScrollView style={{marginBottom: 80}} stickyHeaderIndices={[0]}>
-        <View
-          style={{
-            marginBottom: 10,
-            borderBottomWidth: 1,
-            borderBottomColor: "#a0e1eb",
-            backgroundColor: "white"
-          }}
-        >
-          <TouchableOpacity
-            style={{width: 50, marginLeft: 10, paddingVertical: 8}}
-            onPress={() => routeName === "AdminPanel" ? navigate("Admin") : navigate("Home")}
-          >
-            <Icon style={{fontSize: 30, color: "#03bafc"}} name="arrow-back"/>
-          </TouchableOpacity>
-        </View>
-        <View>
+        <View style={{paddingTop: 15}}>
           <Image
             source={{
               uri: item.image ? item.image : "https://cdn.pixabay.com/photo/2012/04/01/17/29/box-23649_960_720.png"

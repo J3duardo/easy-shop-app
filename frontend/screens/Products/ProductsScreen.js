@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useCallback} from "react";
 import {View, FlatList, Text, Dimensions, ScrollView, ActivityIndicator, AppState} from "react-native";
-import {Container, Header, Icon, Item, Input} from "native-base";
+import {Container} from "native-base";
 import {useFocusEffect} from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -8,6 +8,7 @@ import {useDispatch} from "react-redux";
 import ProductListItem from "../../components/ProductListItem";
 import SearchResults from "./SearchResults";
 import CustomBanner from "../../components/CustomBanner";
+import SearchBar from "../../components/SearchBar";
 import CategoryFilter from "./CategoryFilter";
 import {userAuthSuccess} from "../../redux/actions/userActions";
 
@@ -152,21 +153,7 @@ const ProductsScreen = (props) => {
 
   return (
     <Container>
-      <Header
-        style={{backgroundColor: "#03bafc"}}
-        searchBar
-        rounded
-        androidStatusBarColor="#03bafc"
-      >
-        <Item>
-          <Icon name="md-search-sharp" />
-          <Input
-            placeholder="Search"
-            onChangeText={(text) => searchProductsHandler(text)}
-          />
-        </Item>
-      </Header>
-      
+      <SearchBar onChangeHandler={searchProductsHandler} />
       {term ?
         <SearchResults items={filteredProducts} navigation={props.navigation} />
         :

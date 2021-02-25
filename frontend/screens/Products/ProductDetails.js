@@ -1,11 +1,13 @@
-import React,{useState, useEffect} from "react";
-import {View, Text, Button, Image, StyleSheet, ScrollView} from "react-native";
-import {Left, Right, Container, H1} from "native-base";
+import React,{useState} from "react";
+import {View, Text, Button, Image, StyleSheet, ScrollView, TouchableOpacity} from "react-native";
+import {Left, Right, Container, H1, Icon} from "native-base";
 import {useDispatch, useSelector} from "react-redux";
 import {addToCart} from "../../redux/actions/cartActions";
 
 const ProductDetails = (props) => {
-  const {item} = props.route.params;
+  const {navigate} = props.navigation;
+  console.log(props.navigation)
+  const {item, routeName} = props.route.params;
   const dispatch = useDispatch();
   const items = useSelector((state) => state.cart.items);
 
@@ -17,13 +19,24 @@ const ProductDetails = (props) => {
     return items.findIndex(item => item._id === id)
   }
 
-  useEffect(() => {
-
-  }, [])
-
   return (
     <Container style={styles.container}>
-      <ScrollView style={{padding: 8, marginBottom: 80}}>
+      <ScrollView style={{marginBottom: 80}} stickyHeaderIndices={[0]}>
+        <View
+          style={{
+            marginBottom: 10,
+            borderBottomWidth: 1,
+            borderBottomColor: "#a0e1eb",
+            backgroundColor: "white"
+          }}
+        >
+          <TouchableOpacity
+            style={{width: 50, marginLeft: 10, paddingVertical: 8}}
+            onPress={() => routeName === "AdminPanel" ? navigate("Admin") : navigate("Home")}
+          >
+            <Icon style={{fontSize: 30, color: "#03bafc"}} name="arrow-back"/>
+          </TouchableOpacity>
+        </View>
         <View>
           <Image
             source={{

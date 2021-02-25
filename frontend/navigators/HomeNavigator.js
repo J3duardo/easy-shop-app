@@ -19,7 +19,7 @@ const HomeNavigator = () => {
         name="Product Details"
         component={ProductDetails}
         options={{
-          headerShown: true
+          headerShown: false
         }}
       />
     </Stack.Navigator>

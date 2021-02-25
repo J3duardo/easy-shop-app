@@ -9,7 +9,7 @@ const ProductListItem = (props) => {
     <TouchableOpacity
       style={styles.touchable}
       onPress={() => {
-        props.navigation.navigate("Product Details", {item})
+        props.navigation.navigate("Product Details", {item, routeName: "Home"})
       }}
     >
       <View style={styles.wrapper}>

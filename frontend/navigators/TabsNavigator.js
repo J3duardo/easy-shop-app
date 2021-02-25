@@ -1,15 +1,28 @@
-import React from "react";
-import {View, Text} from "react-native";
+import React, {useEffect, useState} from "react";
+import {View} from "react-native";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/FontAwesome5"
+import {useSelector} from "react-redux";
 import HomeNavigator from "./HomeNavigator";
 import CartNavigator from "./CartNavigator";
 import UserNavigator from "./UserNavigator";
 import CartBadge from "../components/CartBadge";
+import AdminNavigator from "./AdminNavigator";
 
 const Tabs = createBottomTabNavigator();
 
 const TabsNavigator = () => {
+  const {user} = useSelector((state) => state.auth);
+  const [isAdmin, setIsAmin] = useState(false);
+
+  useEffect(() => {
+    if(user && user.isAdmin) {
+      setIsAmin(true);
+    } else {
+      setIsAmin(false)
+    }
+  }, [user])
+
   return (
     <Tabs.Navigator
       initialRouteName="Home"
@@ -54,21 +67,23 @@ const TabsNavigator = () => {
           }
         }}
       />
-      <Tabs.Screen
-        name="Admin"
-        component={() => <Text>Admin panel screen</Text>}
-        options={{
-          tabBarIcon: ({color}) => {
-            return (
-              <Icon
-                name="cog"
-                color={color}
-                size={30}
-              />
-            )
-          }
-        }}
-      />
+      {isAdmin &&
+        <Tabs.Screen
+          name="Admin"
+          component={AdminNavigator}
+          options={{
+            tabBarIcon: ({color}) => {
+              return (
+                <Icon
+                  name="cog"
+                  color={color}
+                  size={30}
+                />
+              )
+            }
+          }}
+        />
+      }
       <Tabs.Screen
         name="User"
         component={UserNavigator}

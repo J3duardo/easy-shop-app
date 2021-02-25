@@ -108,7 +108,11 @@ const Products = (props) => {
           ListHeaderComponent={ListHeader}
           renderItem={({item, index}) => {
             return (
-              <ListItem item={item} index={index} />
+              <ListItem
+                item={item}
+                index={index}
+                setProductsList={setProductsList}
+              />
             )
           }}
         />

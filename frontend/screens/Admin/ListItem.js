@@ -1,20 +1,33 @@
 import React, {useState} from "react";
-import {View, Text, Image, TouchableOpacity, TouchableHighlight, StyleSheet, Dimensions} from "react-native";
-import {Icon} from "native-base";
+import {View, Text, Image, TouchableOpacity, StyleSheet, Dimensions} from "react-native";
 import {useNavigation} from "@react-navigation/native";
+import ProductModal from "./ProductModal";
 
 const ListItem = (props) => {
-  const {item, index} = props;
+  const {item, index, setProductsList} = props;
   const navigation = useNavigation();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <View>
+      {/* Modal para editar/eliminar el producto */}
+      <ProductModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        navigate={navigation.navigate}
+        productId={item._id}
+        setProductsList={setProductsList}
+      />
+
+      {/* Producto */}
       <TouchableOpacity
         style={[
           styles.container,
           {backgroundColor: index % 2 === 0 ? "white" : "gainsboro"}
         ]}
         onPress={() => navigation.navigate("Details", {item, routeName: "AdminPanel"})}
+        onLongPress={() => setIsModalOpen(true)}
       >
         <Image
           style={styles.image}

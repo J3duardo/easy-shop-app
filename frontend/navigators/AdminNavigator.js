@@ -44,11 +44,11 @@ const AdminNavigator = () => {
         }}
       />
       <Stack.Screen
-        name="ProductForm"
+        name="Product Form"
         component={ProductForm}
         options={{
-          // title: "Product Form",
-          // headerShown: true
+          title: "Edit Product",
+          headerShown: true
         }}
       />
     </Stack.Navigator>

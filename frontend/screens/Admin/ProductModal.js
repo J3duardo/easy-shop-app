@@ -1,11 +1,13 @@
 import React, {useState} from "react";
 import {View, Modal, Button, TouchableHighlight, StyleSheet} from "react-native";
 import {Icon, Toast} from "native-base";
-import {useSelector} from "react-redux";
+import {useSelector, useDispatch} from "react-redux";
 import axios from "axios";
+import {userLogout} from "../../redux/actions/userActions";
 
 const ProductModal = (props) => {
   const {navigate, isModalOpen, productId, setIsModalOpen, setProductsList} = props;
+  const dispatch = useDispatch();
   const {token} = useSelector((state) => state.auth);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -43,10 +45,9 @@ const ProductModal = (props) => {
       
     }catch (error) {
       setIsLoading(false);
-
       let message = error.message;
       if(error.response) {
-        message = error.response.data.msg
+        message = error.response.data.msg;
       }
 
       Toast.show({
@@ -57,7 +58,14 @@ const ProductModal = (props) => {
         style: {minHeight: 80},
         type: "danger",
         duration: 8000
-      })
+      });
+
+      // Cerrar sesión y redirigir a login si el token está expirado
+      if(message.includes("expired token")) {
+        setTimeout(() => {
+          dispatch(userLogout());
+        }, 5000);
+      }
     }
   }
 
@@ -65,23 +73,28 @@ const ProductModal = (props) => {
     <Modal
       animationType="fade"
       transparent
+      presentationStyle="overFullScreen"
       visible={isModalOpen}
       onRequestClose={() => setIsModalOpen(false)}
     >
       <View style={styles.centeredModalView}>
         <View style={styles.modalView}>
           <TouchableHighlight
-            underlayColor="#e8e8e8"
+            underlayColor="rgba(0,0,0,0.05)"
             onPress={() => setIsModalOpen(false)}
+            disabled={isLoading}
             style={{
               position:"absolute", 
-              top: 5, 
-              right: 10, 
-              alignSelf: "flex-end"
+              top: 0, 
+              right: 0, 
+              alignSelf: "flex-end",
+              padding: 8,
+              borderRadius: 50
             }}
           >
-            <Icon name="close" type="AntDesign" style={{fontSize: 28}} />
+            <Icon name="close" type="AntDesign" style={{fontSize: 30}} />
           </TouchableHighlight>
+
           <View style={{flexDirection: "row", paddingHorizontal: 20}}>          
             <View style={{width: 60, marginRight: 10}}>
               <Button

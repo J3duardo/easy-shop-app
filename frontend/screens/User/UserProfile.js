@@ -32,10 +32,8 @@ const UserProfile = (props) => {
 
   const logoutHandler = async () => {
     setIsLoading(true);
-    await AsyncStorage.removeItem("user");
-    await AsyncStorage.removeItem("token");
-    dispatch(userLogout());
     dispatch(clearCart());
+    await dispatch(userLogout());
     setIsLoading(false);
     navigate("Login");
   }

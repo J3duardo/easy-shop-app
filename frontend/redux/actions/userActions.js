@@ -98,7 +98,11 @@ export const userLogin = (userData) => {
 // Cerrar sesión de usuario
 /*-------------------------*/
 export const userLogout = () => {
-  return {type: USER_TYPES.USER_LOGOUT}
+  return async (dispatch) => {
+    await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("user");
+    dispatch({type: USER_TYPES.USER_LOGOUT});
+  }
 }
 
 

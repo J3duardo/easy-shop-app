@@ -95,10 +95,10 @@ const ProductModal = (props) => {
             <Icon name="close" type="AntDesign" style={{fontSize: 30}} />
           </TouchableHighlight>
 
-          <View style={{flexDirection: "row", paddingHorizontal: 20}}>          
-            <View style={{width: 60, marginRight: 10}}>
+          <View style={{width: 180, flexDirection: "column", paddingHorizontal: 10}}>          
+            <View style={{width: "100%", marginBottom: 10}}>
               <Button
-                title="Edit"
+                title="Edit Product"
                 color="#03bafc"
                 disabled={isLoading}
                 onPress={() => {
@@ -109,7 +109,7 @@ const ProductModal = (props) => {
             </View>
             <View style={{minWidth: 60}}>
               <Button
-                title="Delete"
+                title="Delete Product"
                 color="red"
                 disabled={isLoading}
                 onPress={async () => {

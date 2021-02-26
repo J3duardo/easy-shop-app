@@ -130,10 +130,10 @@ router.post("/", checkUserRole, (req, res) => {
       })
     }
 
-    if(files.image.size > 2000000) {
+    if(files.image.size > 4000000) {
       return res.status(400).json({
         status: "failed",
-        msg: "Image size cannot be larger than 2mb"
+        msg: "Image size cannot be larger than 4mb"
       })
     }
 
@@ -270,47 +270,151 @@ router.delete("/:productId", checkUserRole, async (req, res) => {
 /*-------------------------------*/
 // Editar (actualizar) productos
 /*-------------------------------*/
-router.patch("/:productId", checkUserRole, async (req, res) => {
-  try {
-    const {category} = req.body;
-    const checkCategory = await Category.findById(category);
+router.patch("/:productId", checkUserRole, (req, res) => {
+  const form = new formidable.IncomingForm();
+  form.keepExtensions = true;
 
-    if(category && !checkCategory) {
-      return res.status(404).json({
+  form.parse(req, async (error, fields, files) => {
+    if(error) {
+      return res.status(400).json({
         status: "failed",
-        msg: "Product category not found or deleted"
+        msg: `Error processing the request: ${error.message}`
       })
     }
 
-    const {productId} = req.params;
-    const product = await Product.findById(productId);
-
-    if(!product) {
-      return res.status(404).json({
+    // Chequear si hay imagen en la data
+    if(!files.image && !fields.image) {
+      return res.status(400).json({
         status: "failed",
-        msg: "Product not found or deleted"
+        msg: "The product image is required."
       })
     }
 
-    // Actualizar cada propiedad del producto con las propiedades presentes en el body del request
-    for(let key in req.body) {
-      product[key] = req.body[key]
+    // Validar el formato de la imagen
+    if(files.image && !files.image.type.includes("jpg") && !files.image.type.includes("jpeg") && !files.image.type.includes("png")) {
+      return res.status(400).json({
+        status: "failed",
+        msg: "The image must be .jpg, .jpeg or .png."
+      })
     }
 
-    // Guardar el producto actualizado
-    await product.save();
-    
-    res.json({
-      status: "success",
-      data: product
-    })
-    
-  } catch (error) {
-    res.status(500).json({
-      status: "failed",
-      msg: `Error: ${error.message}`
-    })
-  }
+    // Validar el tamaño de la imagen
+    if(files.image && files.image.size > 4000000) {
+      return res.status(400).json({
+        status: "failed",
+        msg: "Image size cannot be larger than 4mb"
+      })
+    }
+
+    try {
+      const productCategory = req.body.category;
+      const checkCategory = await Category.findById(productCategory);
+
+      if(productCategory && !checkCategory) {
+        return res.status(404).json({
+          status: "failed",
+          msg: "Product category not found or deleted"
+        })
+      }
+
+      const {productId} = req.params;
+      const product = await Product.findById(productId);
+
+      if(!product) {
+        return res.status(404).json({
+          status: "failed",
+          msg: "Product not found or deleted"
+        })
+      }
+
+      // Extraer la data de los campos del formulario
+      const {name, description, richDescription, brand, price, category, countInStock, rating, numReviews, isFeatured} = fields;
+
+      // Validar los campos del formulario
+      const fieldsValidator = () => {
+        if(!name) {
+          return {
+            isValid: false,
+            msg: "Product name is required"
+          }
+        }
+
+        if(name.length < 4 || name.length > 50) {
+          return {
+            isValid: false,
+            msg: "Product name must be between 4 and 50 caracters"
+          }
+        }
+
+        if(!countInStock) {
+          return {
+            isValid: false,
+            msg: "You must specify the quantity in the stock for the product"
+          }
+        }
+
+        if(countInStock > 255) {
+          return {
+            isValid: false,
+            msg: "The maximum quantity is 255"
+          }
+        }
+
+        return {
+          isValid: true,
+          msg: null
+        }
+      }
+
+      if(!fieldsValidator().isValid) {
+        return res.status(400).json({
+          status: "failed",
+          msg: fieldsValidator().msg
+        })
+      }
+
+      // Subir la imagen a Cloudinary si aplica o mantener la imagen original si no se especificó otra
+      if(files.image) {
+        // Eliminar la imagen anterior de Cloudinary
+        await cloudinary.uploader.destroy(product.imageId, {invalidate: true});
+
+        // Subir la imagen actualizada a cloudinary y actualizar la imagen en la data del producto
+        const uploadResponse = await cloudinary.uploader.upload(files.image.path, {folder: `easyshop/product-image/${brand}`});
+        product.image = uploadResponse.url;
+        product.imageId = uploadResponse.public_id;
+      } else {
+        product.image = fields.image
+      }
+
+      // Actualizar la data del producto
+      product.name = name;
+      product.description = description;
+      product.richDescription = richDescription;
+      product.brand = brand;
+      product.price = price;
+      product.category = category;
+      product.countInStock = countInStock;
+      product.rating = rating;
+      product.numReviews = numReviews;
+      product.isFeatured = isFeatured;
+
+      // Guardar el producto actualizado
+      await product.save();
+      
+      res.json({
+        status: "success",
+        data: product
+      })
+      
+    } catch (error) {
+      console.log({error})
+
+      res.status(500).json({
+        status: "failed",
+        msg: `Error: ${error.message}`
+      })
+    }
+  })
 });
 
 

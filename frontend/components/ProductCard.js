@@ -27,7 +27,7 @@ const ProductCard = (props) => {
         {name.length > 15 ? name.substring(0, 15 - 3) + "..." : name}
       </Text>
       <Text style={styles.price}>${price}</Text>
-      {countInStock > 5 ?
+      {countInStock > 0 ?
         <View style={{width: "75%", marginTop: 10}}>
           <Button
             title={`${isAddedToCart() ? "Added": "Add"}`}
@@ -36,8 +36,6 @@ const ProductCard = (props) => {
             onPress={() => dispatch(addToCart(props.item))}
           />
         </View>
-        : countInStock > 0 && countInStock <= 5 ?
-        <Text style={{marginTop: 20, color: "black"}}>Only {countInStock} in stock!</Text>
         :
         <Text style={{marginTop: 20, color: "black"}}>Not available</Text>
       }

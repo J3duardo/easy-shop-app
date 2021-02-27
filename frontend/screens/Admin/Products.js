@@ -1,8 +1,7 @@
 import React, {useState, useCallback} from "react";
-import {View, Text, FlatList, ActivityIndicator, StyleSheet, Dimensions} from "react-native";
-import {Header, Item, Input, Icon} from "native-base";
+import {View, Text, FlatList, Button, ActivityIndicator, StyleSheet, Dimensions} from "react-native";
 import {useFocusEffect} from "@react-navigation/native";
-import {useSelector, useDispatch} from "react-redux";
+import {useSelector} from "react-redux";
 import axios from "axios";
 import SearchBar from "../../components/SearchBar";
 import ListItem from "./ListItem";
@@ -89,17 +88,37 @@ const Products = (props) => {
   }
 
   return (
-    <View>
+    <View style={{marginBottom: 55}}>
+      {/* Botones del header */}
+      <View style={styles.headerBtnsWrapper}>
+        <View style={styles.headerBtn}>
+          <Button color="orange" title="Orders" onPress={() => navigate("Orders")} />
+        </View>
+        <View style={styles.headerBtn}>
+          <Button
+            color="orange"
+            title="Products"
+            onPress={() => navigate("Product Form", {edit: false, productId: null})}
+          />
+        </View>
+        <View style={styles.headerBtn}>
+          <Button color="orange" title="Categories" onPress={() => navigate("Categories")} />
+        </View>
+      </View>
+
+      {/* Barra de búsqueda */}
       <View>
         <SearchBar onChangeHandler={searchResultsHandler} />
       </View>
 
+      {/* Spinner */}
       {isLoading &&
         <View style={styles.spinnerWrapper}>
           <ActivityIndicator size="large" color="#03bafc" />
         </View>
       }
 
+      {/* Lista de productos */}
       {!isLoading && productsList.length &&
         <FlatList
           style={{paddingHorizontal: 10}}
@@ -122,6 +141,18 @@ const Products = (props) => {
 }
 
 const styles = StyleSheet.create({
+  headerBtnsWrapper: {
+    width: Dimensions.get("screen").width,
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    paddingVertical: 10
+  },
+  headerBtn: {
+    minWidth: 100,
+    borderRadius: 50,
+    overflow: "hidden"
+  },
   listHeader: {
     flexDirection: "row",
     padding: 5,

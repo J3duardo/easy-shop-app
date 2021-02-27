@@ -102,7 +102,7 @@ const ProductModal = (props) => {
                 color="#03bafc"
                 disabled={isLoading}
                 onPress={() => {
-                  navigate("Product Form");
+                  navigate("Product Form", {edit: true, productId});
                   setIsModalOpen(false)
                 }}
               />

@@ -17,7 +17,7 @@ const ProductForm = (props) => {
   const [currentProduct, setCurrentProduct] = useState({});
   const [categories, setCategories] = useState([]);
   const [mainImage, setMainImage] = useState(null);
-  const [pickerValue, setPickerValue] = useState(null);
+  const [pickerValue, setPickerValue] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -387,7 +387,7 @@ const ProductForm = (props) => {
               mode="dropdown"
               iosIcon={<Icon color="#007aaf" name="arrow-down"/>}
               placeholder="Select product category"
-              selectedValue={pickerValue}
+              selectedValue={pickerValue || currentProduct.category._id}
               placeholderStyle={{color: "#007aaf"}}
               placeholderIconColor="#007aaf"
               onValueChange={(e) => {setPickerValue(e); setProductCategory(e)}}

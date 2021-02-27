@@ -87,8 +87,8 @@ router.get("/:orderId", async (req, res) => {
 /*--------------*/
 // Crear órdenes
 /*--------------*/
-router.post("/", checkRole, [
-  check("orderItemsData", "You must especify at least one product and its quantity").isArray({min: 1}).bail(),
+router.post("/", [
+  check("orderItems", "You must especify at least one product and its quantity").isArray({min: 1}).bail(),
   check("shippingAddress1", "The shipping addres is required").not().isEmpty(),
   check("city", "The city of shipping is required").not().isEmpty(),
   check("zip", "The zip code is required").not().isEmpty(),
@@ -111,14 +111,15 @@ router.post("/", checkRole, [
     // Generar los order items y almacenarlos en la base de datos
     const orderItemsIds = [];
     let totalPrice = null;
-    for(let item of req.body.orderItemsData) {
+    for(let item of req.body.orderItems) {
+      
       let newOrderItem = new OrderItem({
         quantity: item.quantity,
         product: item.product
       });
 
       await newOrderItem.save();
-      const product = await Product.findById(item.product).select("price")
+      const product = await Product.findById(item.product).select("price");
       totalPrice = totalPrice + item.quantity * product.price;
       orderItemsIds.push(newOrderItem._id);
     }

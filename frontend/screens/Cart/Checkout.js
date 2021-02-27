@@ -10,6 +10,7 @@ import countriesData from "../../assets/countries.json";
 
 const Checkout = (props) => {
   const items = useSelector((state) => state.cart.items);
+  const {user} = useSelector((state) => state.auth);
   const {navigate} = props.navigation;
 
   const [orderItems, setOrderItems] = useState([]);
@@ -23,8 +24,17 @@ const Checkout = (props) => {
   const [error, setError] = useState(null);
   const [serverResponseError, setServerResponseError] = useState(null);
 
+
+  /*-------------------------------------------------------------------------------------------*/
+  // Generar los items de las órdenes especificando la cantidad de cada producto (1 por defecto)
+  /*-------------------------------------------------------------------------------------------*/
   useEffect(() => {
-    setOrderItems(items);
+    let data = items.map(el => {
+      return {product: el, quantity: 1}
+    });
+
+    setOrderItems(data);
+
     return () => setOrderItems([]);
   }, [items]);
 
@@ -61,10 +71,11 @@ const Checkout = (props) => {
       city,
       country,
       orderItems,
-      orderDate: Date.now(),
+      phone,
       shippingAddress1: address,
       shippingAddress2: secondAddress,
-      zip
+      user: user._id,
+      zip,
     }
 
     return navigate("Payment", {order});

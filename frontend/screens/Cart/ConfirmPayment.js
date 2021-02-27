@@ -1,23 +1,70 @@
 import React, {useState} from "react";
 import {View, ScrollView, StyleSheet, Dimensions} from "react-native";
-import {Text, ListItem, Thumbnail} from "native-base";
-import {useDispatch} from "react-redux";
+import {Text, ListItem, Thumbnail, Toast} from "native-base";
+import {useDispatch, useSelector} from "react-redux";
+import axios from "axios";
 import {clearCart} from "../../redux/actions/cartActions";
 import TouchableCta from "../../components/TouchableCta";
 
 const ConfirmPayment = (props) => {
   const order = props.route.params && props.route.params.order;
+  const {token} = useSelector((state) => state.auth);
   const {navigate} = props.navigation;
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
 
-  const confirmOrderHandler = () => {
+  /*-----------------------------------*/
+  // Enviar la orden a la base de datos
+  /*-----------------------------------*/
+  const confirmOrderHandler = async () => {
     setIsLoading(true);
-    setTimeout(() => {
+    
+    try {
+      const res = await axios({
+        method: "POST",
+        url: "/orders",
+        data: order,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+      
       setIsLoading(false);
-      dispatch(clearCart());
-      navigate("Cart")
-    }, 1500);
+
+      console.log({orderData: res.data.data})
+
+      Toast.show({
+        text: "Your order was placed successfully",
+        buttonText: "OK",
+        buttonStyle: {alignSelf: "center"},
+        position: "bottom",
+        style: {minHeight: 80},
+        type: "success",
+        duration: 6000,
+        onClose: () => {
+          dispatch(clearCart());
+          navigate("Cart");
+        }
+      })
+
+    } catch (error) {
+      setIsLoading(false);
+      let message = error.message;
+      if(error.response) {
+        message = error.response.data.msg
+      }
+
+      Toast.show({
+        text: message,
+        buttonText: "OK",
+        buttonStyle: {alignSelf: "center"},
+        position: "bottom",
+        style: {minHeight: 80},
+        type: "danger",
+        duration: 6000,
+      })
+    }
   }
 
   return (
@@ -54,16 +101,15 @@ const ConfirmPayment = (props) => {
               {order.orderItems.map(item => {
                 return (
                   <ListItem
-
                     style={styles.listItem}
-                    key={item.name}
+                    key={item.product._id}
                   >
                     <View style={styles.thumbnailContainer}>
-                      <Thumbnail source={{uri: item.image}} />
+                      <Thumbnail source={{uri: item.product.image}} />
                     </View>
                     <View style={styles.body}>
-                      <Text style={{flexShrink: 1, marginRight: 10}}>{item.name}</Text>
-                      <Text style={{flexShrink: 0, textAlign: "right"}}>${item.price}</Text>
+                      <Text style={{flexShrink: 1, marginRight: 10}}>{item.product.name}</Text>
+                      <Text style={{flexShrink: 0, textAlign: "right"}}>${item.product.price}</Text>
                     </View>
                   </ListItem>
                 )

@@ -134,7 +134,7 @@ router.patch("/:categoryId", checkUserRole, async (req, res) => {
     }
 
     for(let key in req.body) {
-      categoryId[key] = req.body[key]
+      category[key] = req.body[key]
     }
 
     await category.save();

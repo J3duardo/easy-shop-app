@@ -2,10 +2,10 @@ import React from "react";
 import {View, Text, TouchableOpacity, StyleSheet, ActivityIndicator} from "react-native";
 
 const TouchableCta = (props) => {
-  const {title, onSubmitHandler, isLoading} = props;
+  const {title, onSubmitHandler, isLoading, marginTop} = props;
 
   return (
-    <View style={styles.cta}>
+    <View style={[styles.cta, {marginTop: marginTop === "none" ? 0 : 15}]}>
       <TouchableOpacity style={styles.touchable} disabled={isLoading} onPress={onSubmitHandler}>
         {!isLoading &&
           <Text style={{textTransform: "uppercase", fontSize: 14, color: "white"}}>
@@ -21,8 +21,7 @@ const TouchableCta = (props) => {
 const styles = StyleSheet.create({
   cta: {
     justifyContent: "center",
-    alignItems: "center",
-    marginTop: 15
+    alignItems: "center" 
   },
   touchable: {
     width: 120,

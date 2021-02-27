@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import {View, ScrollView, StyleSheet, Dimensions} from "react-native";
 import {Text, ListItem, Thumbnail, Toast} from "native-base";
 import {useDispatch, useSelector} from "react-redux";
@@ -12,6 +12,22 @@ const ConfirmPayment = (props) => {
   const {navigate} = props.navigation;
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+
+  /*-------------------------------------*/
+  // Calcular el precio total de la orden
+  /*-------------------------------------*/
+  useEffect(() => {
+    let total = null;
+    if(order) {
+      order.orderItems.forEach(item => {
+        total = total + item.product.price * item.quantity
+      });
+      setTotalPrice(total);
+    }
+  }, [order]);
+
 
   /*-----------------------------------*/
   // Enviar la orden a la base de datos
@@ -29,10 +45,6 @@ const ConfirmPayment = (props) => {
           "Content-Type": "application/json"
         }
       });
-      
-      setIsLoading(false);
-
-      console.log({orderData: res.data.data})
 
       Toast.show({
         text: "Your order was placed successfully",
@@ -44,7 +56,7 @@ const ConfirmPayment = (props) => {
         duration: 6000,
         onClose: () => {
           dispatch(clearCart());
-          navigate("Cart");
+          navigate("Home");
         }
       })
 
@@ -75,7 +87,7 @@ const ConfirmPayment = (props) => {
         </Text>
         {order &&
           <React.Fragment>
-            <View style={{width: "85%", borderWidth: 1, borderColor: "#03bafc"}}>
+            <View style={{width: "95%", borderWidth: 1, borderColor: "#03bafc"}}>
               <Text style={styles.title}>Shipping to: </Text>
 
               <View style={{padding: 8}}>
@@ -109,11 +121,15 @@ const ConfirmPayment = (props) => {
                     </View>
                     <View style={styles.body}>
                       <Text style={{flexShrink: 1, marginRight: 10}}>{item.product.name}</Text>
-                      <Text style={{flexShrink: 0, textAlign: "right"}}>${item.product.price}</Text>
+                      <Text style={{flexShrink: 0, marginRight: 10, textAlign: "right"}}>${item.product.price}</Text>
+                      <Text style={{flexShrink: 0, textAlign: "right"}}>x{item.quantity}</Text>
                     </View>
                   </ListItem>
                 )
               })}
+              <Text style={[styles.listItem, {paddingVertical: 10}]}>
+                Total: ${totalPrice}
+              </Text>
             </View>
 
             {/* Enviar la orden */}
@@ -128,7 +144,7 @@ const ConfirmPayment = (props) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: Dimensions.get("window").height,
+    minHeight: Dimensions.get("window").height,
     padding: 10,
     alignItems: "center",
     backgroundColor: "white"
@@ -137,7 +153,8 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "column",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    marginBottom: 15
   },
   title: {
     margin: 8,

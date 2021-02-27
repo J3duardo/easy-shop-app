@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import {View, Button, Dimensions, StyleSheet, TouchableOpacity} from "react-native";
 import {useNavigation} from "@react-navigation/native";
 import {Container, Text, H1} from "native-base";
@@ -12,31 +12,36 @@ const Cart = () => {
   const navigation = useNavigation();
   const cartItems = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
-  // console.log("Cart items:", cartItems);
+
+  const [items, setItems] = useState([]);
+  
+  useEffect(() => {
+    setItems(cartItems);
+  }, [cartItems]);
 
   const itemsRender = () => {
-    if(cartItems.length > 0) {
-      // Calcular el precio total a pagar
+    if(items.length > 0) {
+      // Calcular el precio total a pagar a partir del state local
       let totalPrice = null;
-      cartItems.forEach(item => totalPrice = +(totalPrice + item.price).toFixed(2));
+      items.forEach(item => totalPrice = +(totalPrice + item.product.price * item.quantity).toFixed(2));
 
       return (
         <Container>
           <H1 style={{alignSelf: "center"}}>Cart</H1>
           <SwipeListView
             contentContainerStyle={{paddingBottom: 50, paddingLeft: 10}}
-            keyExtractor={(item) => item._id}
-            data={cartItems}
+            keyExtractor={(item) => item.product._id}
+            data={items}
             ItemSeparatorComponent={() => <View style={{height: 1, backgroundColor: "#eee"}}/>}
-            renderItem={(item) => {
-              return <CartItem item={item} />
+            renderItem={({item}) => {
+              return <CartItem item={item} setItems={setItems} />
             }}
-            renderHiddenItem={(item) => {
+            renderHiddenItem={({item}) => {
               return (
                 <View style={styles.hiddenSwipeContainer}>
                   <TouchableOpacity
                     style={styles.hiddenSwipeBtn}
-                    onPress={() => dispatch(removeFromCart(item.item._id))}
+                    onPress={() => dispatch(removeFromCart(item.product._id))}
                   >
                     <Icon name="trash" color="red" size={30} />
                   </TouchableOpacity>

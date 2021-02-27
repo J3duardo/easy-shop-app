@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {addToCart} from "../redux/actions/cartActions";
 
 const ProductCard = (props) => {
-  const {name, price, image, countInStock} = props.item;
+  const {_id, name, price, image, countInStock} = props.item;
   const dispatch = useDispatch();
   const items = useSelector((state) => state.cart.items);
 
@@ -12,7 +12,7 @@ const ProductCard = (props) => {
   // Chequear si el item ya fue agregado al cart
   /*--------------------------------------------*/
   const isAddedToCart = () => {
-    return items.findIndex(item => JSON.stringify(item._id) === JSON.stringify(props.item._id)) > -1
+    return items.findIndex(item => item.product._id === _id) > -1
   }
 
   return (
@@ -33,7 +33,7 @@ const ProductCard = (props) => {
             title={`${isAddedToCart() ? "Added": "Add"}`}
             color="#03bafc"
             disabled={isAddedToCart()}
-            onPress={() => dispatch(addToCart(props.item))}
+            onPress={() => dispatch(addToCart({product: props.item, quantity: 1}))}
           />
         </View>
         :

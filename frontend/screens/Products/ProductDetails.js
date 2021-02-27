@@ -13,7 +13,7 @@ const ProductDetails = (props) => {
 
   // Chequear si el producto ya fue agregado al carrito
   const isAdded = (id) => {
-    return items.findIndex(item => item._id === id)
+    return items.findIndex(item => item.product._id === id)
   }
 
   return (
@@ -45,7 +45,7 @@ const ProductDetails = (props) => {
             <Button
               title={`${isAdded(item._id) !== -1 ? "Added" : "Add to cart"}`}
               disabled={isAdded(item._id) !== -1 || item.countInStock === 0}
-              onPress={() => dispatch(addToCart(item))}
+              onPress={() => dispatch(addToCart({product: item, quantity: 1}))}
               color="#03bafc"
             />
           </View>

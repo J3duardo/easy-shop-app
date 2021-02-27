@@ -1,13 +1,21 @@
 import React, {useState} from "react";
-import {StyleSheet} from "react-native";
-import {Text, Left, Right, ListItem, Thumbnail, Body} from "native-base";
+import {TouchableOpacity, StyleSheet} from "react-native";
+import {View, Text, Left, Right, ListItem, Thumbnail, Body, Icon} from "native-base";
 
 const CartItem = (props) => {
-  // console.log("Item:", props.item)
-  const {item} = props.item;
-  const [quantity, setQuantity] = useState(item.quantity);
+  const {product, quantity} = props.item;
+  const {setItems} = props;
 
-  if(!item) {
+  const updateProductQuantity = (id, qty) => {
+    setItems(prev => {
+      let updated = [...prev];
+      const index = updated.findIndex(el => el.product._id === id);
+      updated[index].quantity = qty;
+      return updated;
+    })
+  }
+
+  if(!product) {
     return null
   }
 
@@ -18,15 +26,35 @@ const CartItem = (props) => {
     >
       <Left style={{alignSelf: "center", marginBottom: 5}}>
         <Thumbnail
-          source={{uri: item.image ? item.image : "https://cdn.pixabay.com/photo/2012/04/01/17/29/box-23649_960_720.png"}}
+          source={{uri: product.image ? product.image : "https://cdn.pixabay.com/photo/2012/04/01/17/29/box-23649_960_720.png"}}
         />
       </Left>
       <Body style={styles.itemBody}>
         <Left>
-          <Text>{item.name}</Text>
+          <Text>{product.name}</Text>
         </Left>
         <Right>
-          <Text>${item.price}</Text>
+          <View style={{flexDirection: "row", alignItems: "center"}}>
+            <Text style={{marginRight: 15}}>${product.price}</Text>
+            <View>
+              <TouchableOpacity
+                style={{padding: 5}}
+                onPress={() => updateProductQuantity(product._id, quantity + 1)}
+              >
+                <Icon type="Entypo" name="chevron-thin-up" />
+              </TouchableOpacity>
+              <Text style={{textAlign: "center"}}>{quantity}</Text>
+              <TouchableOpacity
+                style={{padding: 5}}
+                onPress={() => {
+                  let amount = quantity > 1 ? quantity - 1 : 1;
+                  updateProductQuantity(product._id, amount)
+                }}
+              >
+                <Icon type="Entypo" name="chevron-thin-down" />
+              </TouchableOpacity>
+            </View>
+          </View>
         </Right>
       </Body>
     </ListItem>
@@ -43,7 +71,7 @@ const styles = StyleSheet.create({
   itemBody: {
     flexDirection: "row",
     alignItems: "center",
-    margin: 10,
+    marginHorizontal: 10,
     borderBottomColor: "transparent"
   },
 });

@@ -25,15 +25,11 @@ const Checkout = (props) => {
   const [serverResponseError, setServerResponseError] = useState(null);
 
 
-  /*-------------------------------------------------------------------------------------------*/
-  // Generar los items de las órdenes especificando la cantidad de cada producto (1 por defecto)
-  /*-------------------------------------------------------------------------------------------*/
+  /*---------------------------------*/
+  // Generar los items de las órdenes
+  /*---------------------------------*/
   useEffect(() => {
-    let data = items.map(el => {
-      return {product: el, quantity: 1}
-    });
-
-    setOrderItems(data);
+    setOrderItems(items);
 
     return () => setOrderItems([]);
   }, [items]);

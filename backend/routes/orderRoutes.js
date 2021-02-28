@@ -10,7 +10,7 @@ const router = express.Router();
 /*-----------------------------------*/
 // Consultar todas las órdenes creadas
 /*-----------------------------------*/
-router.get("/", async (req, res) => {
+router.get("/", checkRole, async (req, res) => {
   try {
     const orders = await Order.find()
     .populate({

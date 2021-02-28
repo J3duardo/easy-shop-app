@@ -39,7 +39,8 @@ const ProductForm = (props) => {
   /*------------------------------------------------------*/
   useEffect(() => {
     if(!edit) {
-      setIsLoading(false);
+      setPickerValue("");
+      return setIsLoading(false);
     }
 
     if(edit && productId) {
@@ -49,7 +50,7 @@ const ProductForm = (props) => {
         url: `/products/details/${productId}`
       })
       .then(res => {
-        const {image, brand, name, price, description, richDescription, category, countInStock, rating, numReviews, isFeatured} = res.data.data;
+        const {_id, image, brand, name, price, description, richDescription, category, countInStock, rating, numReviews, isFeatured} = res.data.data;
 
         setCurrentProduct(res.data.data);
         setProductImage(image);
@@ -64,6 +65,7 @@ const ProductForm = (props) => {
         setProductNumReviews(numReviews);
         setProductIsFeatured(isFeatured);
 
+        setPickerValue(_id);
         setIsLoading(false);
       })
       .catch(err => {
@@ -85,7 +87,7 @@ const ProductForm = (props) => {
         setIsLoading(false);
       })
     }
-  }, [edit, productId]);  
+  }, [edit, productId]);
 
 
   /*------------------------------------*/
@@ -272,6 +274,8 @@ const ProductForm = (props) => {
       })
     }
   }
+
+  console.log({pickerValue})
   
 
   return (
@@ -387,7 +391,7 @@ const ProductForm = (props) => {
               mode="dropdown"
               iosIcon={<Icon color="#007aaf" name="arrow-down"/>}
               placeholder="Select product category"
-              selectedValue={pickerValue || currentProduct.category._id}
+              selectedValue={pickerValue}
               placeholderStyle={{color: "#007aaf"}}
               placeholderIconColor="#007aaf"
               onValueChange={(e) => {setPickerValue(e); setProductCategory(e)}}

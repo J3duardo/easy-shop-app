@@ -58,7 +58,7 @@ const Products = (props) => {
     if(!term.length) {
       setProductsFiltered(productsList)
     } else {
-      const filtered = productsList.filter(item => item.name.toLowerCase().includes(term));
+      const filtered = productsList.filter(item => item.product.name.toLowerCase().includes(term));
       setProductsFiltered(filtered)
     }
   }

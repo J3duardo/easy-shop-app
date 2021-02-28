@@ -11,6 +11,7 @@ import CartItem from "../../components/CartItem";
 const Cart = () => {
   const navigation = useNavigation();
   const cartItems = useSelector((state) => state.cart.items);
+  const {token} = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   const [items, setItems] = useState([]);
@@ -62,7 +63,8 @@ const Cart = () => {
             </View>
             <View style={{flexDirection: "row", flex: 1, justifyContent: "flex-end"}}>
               <View style={{marginRight: 5}}>
-                <Button title="Checkout" color="#03bafc" onPress={() => navigation.navigate("Checkout")} />
+                {!token && <Button title="Login" color="#03bafc" onPress={() => navigation.navigate("Login")} />}
+                {token && <Button title="Checkout" color="#03bafc" onPress={() => navigation.navigate("Checkout")} />}
               </View>
               <Button title="Clear cart" color="#03bafc" onPress={() => dispatch(clearCart())} />
             </View>

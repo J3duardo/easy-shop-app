@@ -44,9 +44,7 @@ const OrderCard = (props) => {
       await axios({
         method: "PATCH",
         url: `/orders/${_id}`,
-        data: {
-          e
-        },
+        data: {status: e},
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -149,14 +147,18 @@ const OrderCard = (props) => {
             placeholder="Change order status"
             style={{color: cardColor === "#E74C3C" ? "white" : "black"}}
             placeholderStyle={{color: "#007AFF"}}
+            enabled={!isLoading}
             onValueChange={async (e) => {
               await orderStatusChangeHandler(e);
               setOrderStatus(e);
             }}
           >
             {pickerValues.map(item => {
+              const labelChars = item.split("");
+              const firstLetter = labelChars[0].toUpperCase();
+              const label = firstLetter + labelChars.splice(1, labelChars.length - 1).join("");
               return (
-                <Item key={item} label={item} value={item} />
+                <Item key={item} label={label} value={item} />
               )
             })}
           </Picker>

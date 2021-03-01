@@ -4,6 +4,7 @@ const {check, validationResult} = require("express-validator");
 const Order = require("../models/orderModel");
 const OrderItem = require("../models/orderItemModel");
 const Product = require("../models/productModel");
+const User = require("../models/userModel");
 const checkRole = require("../middlewares/checkRole");
 const router = express.Router();
 
@@ -207,6 +208,50 @@ router.delete("/:orderId", async (req, res) => {
     })
   }
 });
+
+
+/*------------------------------------*/
+// Consultar las órdenes de un usuario
+/*------------------------------------*/
+router.get("/user/:userId", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+
+    if(!user) {
+      return res.status(404).json({
+        status: "failed",
+        msg: "User not found or deleted"
+      })
+    }
+
+    const userOrders = await Order.find({user: user._id})
+    .populate({
+      path: "orderItems",
+      select: "-__v",
+      populate: {
+        path: "product",
+        select: "name description category",
+        populate: {path: "category", select: "name color icon"}
+      }
+    })
+    .populate({
+      path: "user",
+      select: "_id name email phone zip country"
+    })
+    .sort({createdAt: -1});
+
+    res.json({
+      status: "success",
+      data: userOrders
+    })
+    
+  } catch (error) {
+    res.status(500).json({
+      status: "failed",
+      msg: `Error: ${error.message}`
+    })
+  }
+})
 
 
 /*----------------------------*/

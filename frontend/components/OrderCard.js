@@ -7,7 +7,7 @@ import moment from "moment";
 import {navigate} from "../navigationRef";
 
 const OrderCard = (props) => {
-  const {_id, shippingAddress1, shippingAddress2, city, country, createdAt, totalPrice, status} = props.order;
+  const {_id, shippingAddress1, shippingAddress2, city, country, createdAt, totalPrice, status, user} = props.order;
   const {token} = useSelector((state) => state.auth);
 
   const [orderStatus, setOrderStatus] = useState(status);
@@ -107,6 +107,9 @@ const OrderCard = (props) => {
           Status: {orderStatus}
         </Text>
         <Text style={{color: cardColor === "#E74C3C" ? "white" : "black"}}>
+          Customer: {user.name}
+        </Text>
+        <Text style={{color: cardColor === "#E74C3C" ? "white" : "black"}}>
           Address 1: {shippingAddress1}
         </Text>
         <Text style={{color: cardColor === "#E74C3C" ? "white" : "black"}}>
@@ -131,7 +134,7 @@ const OrderCard = (props) => {
             borderTopColor: `${cardColor === "#E74C3C" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.1)"}`
           }}
         >
-          {Platform.OS === "android" &&
+          {props.routeName !== "UserProfile" && Platform.OS === "android" &&
             <Text style={{
               marginTop: 10,
               textAlign: "center",
@@ -140,28 +143,30 @@ const OrderCard = (props) => {
               Update order status
             </Text>
           }
-          <Picker
-            mode="dropdown"
-            iosIcon={<Icon name="arrow-down"/>}
-            selectedValue={orderStatus}
-            placeholder="Change order status"
-            style={{color: cardColor === "#E74C3C" ? "white" : "black"}}
-            placeholderStyle={{color: "#007AFF"}}
-            enabled={!isLoading}
-            onValueChange={async (e) => {
-              await orderStatusChangeHandler(e);
-              setOrderStatus(e);
-            }}
-          >
-            {pickerValues.map(item => {
-              const labelChars = item.split("");
-              const firstLetter = labelChars[0].toUpperCase();
-              const label = firstLetter + labelChars.splice(1, labelChars.length - 1).join("");
-              return (
-                <Item key={item} label={label} value={item} />
-              )
-            })}
-          </Picker>
+          {props.routeName !== "UserProfile" &&
+            <Picker
+              mode="dropdown"
+              iosIcon={<Icon name="arrow-down"/>}
+              selectedValue={orderStatus}
+              placeholder="Change order status"
+              style={{color: cardColor === "#E74C3C" ? "white" : "black"}}
+              placeholderStyle={{color: "#007AFF"}}
+              enabled={!isLoading}
+              onValueChange={async (e) => {
+                await orderStatusChangeHandler(e);
+                setOrderStatus(e);
+              }}
+            >
+              {pickerValues.map(item => {
+                const labelChars = item.split("");
+                const firstLetter = labelChars[0].toUpperCase();
+                const label = firstLetter + labelChars.splice(1, labelChars.length - 1).join("");
+                return (
+                  <Item key={item} label={label} value={item} />
+                )
+              })}
+            </Picker>
+          }
         </View>
       </View>
     </View>

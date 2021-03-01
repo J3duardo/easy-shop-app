@@ -45,6 +45,8 @@ const Orders = () => {
         })
       })
     }
+
+    return () => setOrders([]);
   }, [token]));
 
 

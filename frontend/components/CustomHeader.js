@@ -1,6 +1,6 @@
 import React from "react";
 import {Image, SafeAreaView, StyleSheet, Text} from "react-native";
-import icon from "../assets/icon.png";
+import icon from "../assets/icon-rectangular.png";
 
 const CustomHeader = () => {
   return (
